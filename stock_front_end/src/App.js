@@ -1,25 +1,25 @@
 import logo from './logo.svg';
+import {useState} from "react"
 import './App.css';
 
 function App() {
+  const [text, setText] = useState("");
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Stock App</h1>   
+ <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type here..."
+      />
+
+      <p>Ticker: {text}</p>
+
+         
       </header>
     </div>
   );
 }
-
 export default App;
