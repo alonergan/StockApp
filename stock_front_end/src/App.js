@@ -26,6 +26,24 @@ function App() {
       setResponse("Error sending request");
     }
   };
+
+ const handleDelete = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/submit/", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ticker: ticker }),
+      });
+
+      const data = await res.json();
+      setResponse(JSON.stringify(data));
+    } catch (err) {
+      console.error(err);
+      setResponse("Error deleting");
+    }
+  };
   
   return (
     <div className="App">
@@ -42,6 +60,31 @@ function App() {
        <button type="submit" style={{ marginLeft: "10px" }}>
           Send
         </button>
+
+      <button
+          type="button"
+          onClick={handleDelete}
+          sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
+      >
+        Delete
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
+      >
+        Update
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
+      >
+        Read
+        </button>
+
       </form>
       <div style={{ marginTop: "20px" }}>
         <strong>Response:</strong>
