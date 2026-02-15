@@ -57,34 +57,30 @@ function App() {
         placeholder="Enter Ticker"
         onChange={(e) => setText(e.target.value)}    
       />
-       <button type="submit" style={{ marginLeft: "10px" }}>
-          Send
-        </button>
-
+      <button type="submit" style={{ marginLeft: "10px" }}>
+        Send
+      </button>
       <button
           type="button"
           onClick={handleDelete}
           sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
       >
-        Delete
-        </button>
-
-        <button
+      Delete
+      </button>
+      <button
           type="button"
           onClick={handleDelete}
           sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
       >
-        Update
-        </button>
-
-        <button
+      Update
+      </button>
+      <button
           type="button"
           onClick={handleDelete}
           sytle={{padding: "8px", fontSize: "12px", height: "40px", width: "80px" }}
       >
-        Read
-        </button>
-
+      Read
+      </button>
       </form>
       <div style={{ marginTop: "20px" }}>
         <strong>Response:</strong>
