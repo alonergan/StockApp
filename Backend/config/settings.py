@@ -152,5 +152,7 @@ REST_FRAMEWORK = {
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'Frontend/dist/assets'),
+    os.path.join(BASE_DIR, 'Frontend/dist'),
 ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"

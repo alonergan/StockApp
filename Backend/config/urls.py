@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.generic import TemplateView
-
 # Reset admin urls to avoid caching a collision with stock endpoints
 admin.autodiscover()
 admin.site._urls = None
