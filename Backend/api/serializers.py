@@ -16,28 +16,40 @@ class StockSerializer(serializers.ModelSerializer):
 
 class UserAccountSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
-    accountID = AccountSerializer(read_only=True)
+    account = AccountSerializer(read_only=True)
 
     class Meta:
         model = UserAccount
-        fields = ['id', 'username', 'accountID']
+        fields = ['id', 'username', 'account']
 
 class AccountStandingSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountStanding
-        fields = ['id', 'accountID', 'balance', 'timeStamp']
+        fields = ['id', 'account', 'balance', 'timeStamp']
 
 class AccountHoldingSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountHolding
-        fields = ['id', 'accountID', 'stockID', 'currentlyHeld']
+        fields = ['id', 'account', 'stock', 'currentlyHeld']
 
 class TradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trade
-        fields = ['id', 'accountID', 'stockID', 'timeStamp', 'price', 'method']
+        fields = ['id', 'account', 'stock', 'timeStamp', 'price', 'method']
 
 class StockPriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockPrice
-        fields = ['id', 'stockID', 'price', 'timeStamp']
+        fields = ['id', 'stock', 'price', 'timeStamp']
+
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150);
+    password = serializers.CharField(write_only=True, min_length=8)
+    startBalance = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    riskLevel = serializers.IntegerField(required=False)
+    thresholdPercentage = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
