@@ -52,7 +52,7 @@ export default function App() {
         <div style={{ padding: 24 }}>
             <h1>Counter</h1>
             <div style={{ fontSize: 32, marginBottom: 12 }}>
-                {counterValue === null ? "Welcome to StockApp" : counterValue}
+                {counterValue === null ? "Welcome to our StockApp" : counterValue}
             </div>
             <button onClick={incrementCounter} disabled={loading}>
                 {"Increment Counter"}
