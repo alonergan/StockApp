@@ -75,6 +75,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: "COSC540-backend-StockApp"
+          app-name: "COSC540-Backend-StockApp"
           slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F39A8B9CDEF0437C879F381431E4BB2F }}
