@@ -77,6 +77,7 @@ TEMPLATES = [
     },
 ]
 
+STATIC_ROOT = BASE_DIR/'staticfiles'
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
