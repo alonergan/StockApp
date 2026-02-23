@@ -3,7 +3,7 @@ from .settings import *
 from .settings import BASE_DIR
 
 ALLOWED_HOSTS =[os.environ['WEBSITE_HOSTNAME']]
-CSRF_TRUSED_ORIGINS = ['https://'+os.environ['WEBSITE_HOSTNAME']]
+CSRF_TRUSTED_ORIGINS = ['https://'+os.environ['WEBSITE_HOSTNAME']]
 DEBUG = False
 SECRET_KEY = os.environ['MY_SECRET_KEY']
 
@@ -19,9 +19,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-"https://cosc540-backend-stockapp.azurewebsites.net"
-]
+#CORS_ALLOWED_ORIGINS = [
+#"https://cosc540-backend-stockapp.azurewebsites.net"
+#]
 
 STORAGES = {
     "default": {
