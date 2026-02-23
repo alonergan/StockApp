@@ -19,16 +19,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-#CORS_ALLOWED_ORIGINS = [
-#    'http://localhost:3000',
-#    'http://localhost:5173'
-#]
+CORS_ALLOWED_ORIGINS = [
+"https://cosc540-backend-stockapp.azurewebsites.net"
+]
 
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
-    "staticfiles":{
+    "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
@@ -44,6 +43,24 @@ DATABASES = {
         "USER": CONNECTION_STR['user'],
         "PASSWORD": CONNECTION_STR['password'],
     }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
 }
 
 STATIC_ROOT = BASE_DIR/'staticfiles'
