@@ -1,65 +1,41 @@
-import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Dashboard from "./components/Dashboard";
+import Account from "./components/Account";
+import NavBar from "./components/NavBar";
+import { useAuth } from "./context/AuthContext";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+// Bypass environment rule to allow us to not use login for development
+const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-export default function App() {
-    const [counterValue, setCounterValue] = useState(null);
-    const [loading, setLoading] = useState(false);
+function ProtectedLayout() {
+    const { me } = useAuth();
 
-    async function loadCounter() {
-        const res = await fetch(`${baseUrl}/api/counter`);
-        const data = await res.json();
-        setCounterValue(data.value);
-    }
-
-    async function incrementCounter() {
-        setLoading(true);
-
-        try {
-            const res = await fetch(`${baseUrl}/api/counter/increment/`, {
-                method: "POST",
-            });
-
-            const data = await res.json();
-            setCounterValue(data.value);
-        }
-        finally {
-            setLoading(false);
-        }
-    }
-
-    async function decrementCounter() {
-        setLoading(true);
-
-        try {
-            const res = await fetch(`${baseUrl}/api/counter/decrement/`, {
-                method: "POST",
-            });
-
-            const data = await res.json();
-            setCounterValue(data.value);
-        }
-        finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        loadCounter();
-    }, []);
+    if (!BYPASS_AUTH && !me) return <Navigate to="/login" replace />;
 
     return (
-        <div style={{ padding: 24 }}>
-            <h1>Counter</h1>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>
-                {counterValue === null ? "Loading data..." : counterValue}
+        <div style={{ minHeight: "100%", display: "flex", flexDirection: "column" }}>
+            <NavBar />
+            <div style={{ padding: 16 }}>
+                <Routes>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/accounts" element={<Account />} />
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
             </div>
-            <button onClick={incrementCounter} disabled={loading}>
-                {"Increment Counter"}
-            </button>
-            <button onClick={decrementCounter} disabled={loading} style={{ marginLeft: 8 }}>
-                {"Decrement Counter"}
-            </button>
         </div>
-    )
+    );
+}
+
+
+export default function App() {
+    return (
+        <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/*" element={<ProtectedLayout />} />
+        </Routes>
+    );
 }
