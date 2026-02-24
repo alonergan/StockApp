@@ -19,6 +19,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+#Still need this
 #CORS_ALLOWED_ORIGINS = [
 #"https://cosc540-backend-stockapp.azurewebsites.net"
 #]
