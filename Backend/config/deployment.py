@@ -21,7 +21,7 @@ MIDDLEWARE = [
 
 #Still need this
 #CORS_ALLOWED_ORIGINS = [
-#"https://cosc540-backend-stockapp.azurewebsites.net"
+#"https://cosc540-frontend-stockapp.azurewebsites.net"
 #]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
