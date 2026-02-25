@@ -6,13 +6,24 @@ import './index.css'
 import App from './App.jsx'
 import "antd/dist/reset.css";
 import "./index.css";
+import { ConfigProvider, theme as antdTheme } from "antd";
 
 createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>
-            <AuthProvider>
-                <App />
-            </AuthProvider>
+            <ConfigProvider
+                theme={{
+                    algorithm: antdTheme.darkAlgorithm,
+                    token: {
+                        colorPrimary: "#4096ff",
+                        borderRadius: 12,
+                    },
+                }}
+            >
+                <AuthProvider>
+                    <App />
+                </AuthProvider>
+            </ConfigProvider>
         </BrowserRouter>
     </React.StrictMode>
 )

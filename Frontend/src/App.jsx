@@ -5,11 +5,11 @@ import Dashboard from "./components/Dashboard";
 import Accounts from "./components/Accounts";
 import NavBar from "./components/NavBar";
 import { useAuth } from "./context/AuthContext";
-import { Layout } from "antd";
+import { Layout, theme } from "antd";
 import React from "react";
 
 // Bypass environment rule to allow us to not use login for development
-const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === "true";
+const BYPASS_AUTH = true; // import.meta.env.VITE_BYPASS_AUTH === "true";
 
 const { Header, Content } = Layout;
 
@@ -18,16 +18,16 @@ function ProtectedLayout() {
 
     if (!BYPASS_AUTH && !me) return <Navigate to="/login" replace />;
 
+    const { token } = theme.useToken();
+
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <Header style={{ paddingInline: 16 }}>
                 <NavBar />
             </Header>
 
-            <Content style={{ padding: 16 }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-                    <Outlet />
-                </div>
+            <Content style={{ padding: 16, background: token.colorBgLayout }}>
+                <Outlet />
             </Content>
         </Layout>
     );

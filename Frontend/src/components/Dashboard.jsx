@@ -6,20 +6,22 @@ const { Title, Text } = Typography;
 export default function Dashboard() {
     const { me } = useAuth();
     return (
-        <div>
-            <Row>
-                <Col span={16}>
-                    <Card>
-                        <h2>Dashboard Chart Here</h2>
-                    </Card>
-                </Col>
+        <Row gutter={[16, 16]}>
+            <Col lg={16}>
+                <Card style={{ width: "100%"}} title="Chart">
+                    <div style={{ height: 320 }}>
+                        Dashboard Chart Here: Todo by Jay
+                    </div>
+                </Card>
+            </Col>
 
-                <Col span={8}>
-                    <Card>
-                        <h2>Holdings Here</h2>
-                    </Card>
-                </Col>
-            </Row>
-        </div>
+            <Col lg={8}>
+                <Card style={{ width: "100%" }} title="Holdings">
+                    <div style={{ height: 320 }}>
+                        Holdings Here: Todo by Jay
+                    </div>
+                </Card>
+            </Col>
+        </Row>
     );
 }
