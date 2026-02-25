@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 
-export default function Account() {
+export default function Accounts() {
     const { access } = useAuth();
     const [accounts, setAccounts] = useState([]);
 
