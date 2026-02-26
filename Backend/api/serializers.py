@@ -9,11 +9,6 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ['id', 'startBalance', 'balance', 'riskLevel', 'thresholdPercentage']
 
-class StockSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stock
-        fields = ['id', 'ticker', 'name']
-
 class UserAccountSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     account = AccountSerializer(read_only=True)
@@ -28,19 +23,32 @@ class AccountStandingSerializer(serializers.ModelSerializer):
         fields = ['id', 'account', 'balance', 'timeStamp']
 
 class AccountHoldingSerializer(serializers.ModelSerializer):
+    ticker = serializers.CharField(source="stock.ticker", read_only=True)
+    stockName = serializers.CharField(source="stock.name", read_only=True)
+
     class Meta:
         model = AccountHolding
-        fields = ['id', 'account', 'stock', 'currentlyHeld']
+        fields = ["id", "account", "stock", "ticker", "stockName", "currentlyHeld"]
 
 class TradeSerializer(serializers.ModelSerializer):
+    ticker = serializers.CharField(source="stock.ticker", read_only=True)
+    stockName = serializers.CharField(source="stock.name", read_only=True)
+
     class Meta:
         model = Trade
-        fields = ['id', 'account', 'stock', 'timeStamp', 'price', 'method']
+        fields = ["id", "account", "stock", "ticker", "stockName", "timeStamp", "price", "method"]
 
 class StockPriceSerializer(serializers.ModelSerializer):
+    ticker = serializers.CharField(source="stock.ticker", read_only=True)
+
     class Meta:
         model = StockPrice
-        fields = ['id', 'stock', 'price', 'timeStamp']
+        fields = ["id", "stock", "ticker", "price", "timeStamp"]
+
+class StockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stock
+        fields = ["id", "ticker", "name"]
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150);

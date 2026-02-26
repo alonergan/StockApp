@@ -11,7 +11,7 @@ class Account(models.Model):
         return f"{self.id}"
 
 class Stock(models.Model):
-    ticker = models.CharField(max_length=255)
+    ticker = models.CharField(max_length=255, unique=True, db_index=True)
     name = models.CharField(max_length=255)
 
     def __str__(self):
