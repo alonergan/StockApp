@@ -10,7 +10,7 @@ export default function Dashboard() {
             <Col lg={16}>
                 <Card style={{ width: "100%"}} title="Chart">
                     <div style={{ height: 320 }}>
-                        Dashboard Chart Here: Todo by Jay
+                        Dashboard Chart Here: In Work by Jay
                     </div>
                 </Card>
             </Col>
@@ -18,7 +18,7 @@ export default function Dashboard() {
             <Col lg={8}>
                 <Card style={{ width: "100%" }} title="Holdings">
                     <div style={{ height: 320 }}>
-                        Holdings Here: Todo by Jay
+                        Holdings Here: In Work by Jay
                     </div>
                 </Card>
             </Col>
