@@ -36,16 +36,23 @@ class AccountStanding(models.Model):
 class AccountHolding(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    currentlyHeld = models.BooleanField()
+    currentlyHeld = models.BooleanField(default=False)
+    quantity = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     def __str__(self):
         return f"Account: {self.account}, Stock: {self.stock}, Held: {self.currentlyHeld}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["account", "stock"], name="uniq_account_stock_holding")
+        ]
 
 class Trade(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     timeStamp = models.DateTimeField()
     price = models.DecimalField(decimal_places=2, max_digits=12)
+    quantity = models.DecimalField(max_digits=18, decimal_places=8, default=0)    
     method = models.CharField(max_length=255)
 
     def __str__(self):

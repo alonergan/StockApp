@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from .models import Account, Stock, UserAccount, AccountStanding, AccountHolding, Trade, StockPrice
 from .serializers import RegisterSerializer, AccountSerializer, StockSerializer, UserAccountSerializer, AccountStandingSerializer, AccountHoldingSerializer, TradeSerializer, StockPriceSerializer
 from .filters import StockPriceFilter, TradeFilter, HoldingFilter, StandingFilter
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -124,6 +125,29 @@ class TradeViewSet(viewsets.ModelViewSet):
             .filter(account=account)
             .order_by("-timeStamp")
         )
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        account = get_request_account(self.request)
+        trade = serializer.save(account=account)
+
+        holding, _ = AccountHolding.objects.select_for_update().get_or_create(
+            account=account,
+            stock=trade.stock,
+            defaults={"quantity": Decimal("0")}
+        )
+
+        if trade.method.upper() == "BUY":
+            holding.quantity += trade.quantity
+        elif trade.method.upper() == "SELL":
+            if holding.quantity < trade.quantity:
+                raise ValidationError("Insufficient shares to sell.")
+            holding.quantity -= trade.quantity
+        else:
+            raise ValidationError("method must be BUY or SELL")
+
+        holding.currentlyHeld = holding.quantity > 0
+        holding.save()
 
 class StockPriceViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = StockPriceSerializer

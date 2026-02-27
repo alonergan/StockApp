@@ -14,15 +14,18 @@ class StockPriceFilter(django_filters.FilterSet):
 class TradeFilter(django_filters.FilterSet):
     start = django_filters.IsoDateTimeFilter(field_name="timeStamp", lookup_expr="gte")
     end = django_filters.IsoDateTimeFilter(field_name="timeStamp", lookup_expr="lte")
+    ticker = django_filters.CharFilter(field_name="stock__ticker", lookup_expr="iexact")
 
     class Meta:
         model = Trade
         fields = ["stock", "method", "start", "end"]
 
 class HoldingFilter(django_filters.FilterSet):
+    ticker = django_filters.CharFilter(field_name="stock__ticker", lookup_expr="iexact")
+
     class Meta:
         model = AccountHolding
-        fields = ["stock", "currentlyHeld"]
+        fields = ["stock", "currentlyHeld", "ticker"]
 
 class StandingFilter(django_filters.FilterSet):
     start = django_filters.IsoDateTimeFilter(field_name="timeStamp", lookup_expr="gte")

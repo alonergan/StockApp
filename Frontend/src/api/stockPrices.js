@@ -1,9 +1,37 @@
 import { api } from "./client";
 
-export function getStockPrices({ stockId, ticker, start, end, ordering = "timeStamp" }) {
-    const params = { start, end, ordering };
-    if (ticker) params.ticker = ticker;     // preferred by frontend
-    else if (stockId) params.stock = stockId;
+/**
+ * Cleans empty strings so they dont cause issues with the backend api
+ */
+function cleanParams(params = {}) {
+    return Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")
+    );
+}
 
-    return api.get("/api/stock-prices/", { params }).then((r) => r.data);
+/**
+ * GET /api/stock-prices/
+ * Query params:
+ * - ticker (preferred) OR stockId (internal Stock PK)
+ * - start/end ISO datetimes
+ * - ordering (default "timeStamp")
+ */
+export async function getStockPrices({ stockId, ticker, start, end, ordering = "timeStamp" } = {}) {
+    const params = cleanParams({
+        ticker,
+        stock: ticker ? undefined : stockId,
+        start,
+        end,
+        ordering,
+    });
+    const res = await api.get("/api/stock-prices/", { params });
+    return res.data;
+}
+
+/**
+ * Gets the latest price for a stock
+ */
+export async function getLatestStockPrice({ stockId, ticker } = {}) {
+    const data = await getStockPrices({ stockId, ticker, ordering: "-timeStamp" });
+    return Array.isArray(data) ? data[0] ?? null : data;
 }
