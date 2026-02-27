@@ -36,7 +36,6 @@ export default function Dashboard() {
             <Col lg={8}>
                 <Card style={{ width: "100%" }} title="Holdings">
                     <div>
-                        <Text>{holdingData[0].ticker}: {holdingData[0].quantity}</Text>
                     </div>
                 </Card>
             </Col>
