@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from .models import Account, Stock, UserAccount, AccountStanding, AccountHolding, Trade, StockPrice
 from .serializers import RegisterSerializer, AccountSerializer, StockSerializer, UserAccountSerializer, AccountStandingSerializer, AccountHoldingSerializer, TradeSerializer, StockPriceSerializer
 from .filters import StockPriceFilter, TradeFilter, HoldingFilter, StandingFilter
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 User = get_user_model()
 
@@ -71,6 +71,43 @@ class AccountViewSet(viewsets.ModelViewSet):
 
         account = serializer.save()
         UserAccount.objects.create(user=self.request.user, account=account)
+
+    def _parse_amount(self, request):
+        amount = request.data.get("amount", None)
+        if amount is None:
+            raise ValidationError({"amount": "This field is required."})
+        try:
+            amount = Decimal(str(amount))
+        except (InvalidOperation, ValueError):
+            raise ValidationError({"amount": "Invalid number."})
+        if amount <= 0:
+            raise ValidationError({"amount": "Must be > 0."})
+        return amount
+
+    @action(detail=True, methods=["post"], url_path="deposit")
+    @transaction.atomic
+    def deposit(self, request, pk=None):
+        amount = self._parse_amount(request)
+        account = self.get_queryset().select_for_update().get(pk=pk)
+
+        account.balance = (account.balance + amount)
+        account.save(update_fields=["balance"])
+
+        return Response(self.get_serializer(account).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="withdraw")
+    @transaction.atomic
+    def withdraw(self, request, pk=None):
+        amount = self._parse_amount(request)
+        account = self.get_queryset().select_for_update().get(pk=pk)
+
+        if account.balance < amount:
+            raise ValidationError({"amount": "Insufficient funds."})
+
+        account.balance = (account.balance - amount)
+        account.save(update_fields=["balance"])
+
+        return Response(self.get_serializer(account).data, status=status.HTTP_200_OK)
 
 class StockViewSet(viewsets.ModelViewSet):
     queryset = Stock.objects.all().order_by('ticker')
