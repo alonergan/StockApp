@@ -10,7 +10,7 @@ ModuleRegistry.registerModules([AllCommunityModule, CategoryAxisModule, LegendMo
 
 const { Title, Text } = Typography;
 
-const ChartExample = () => {
+const BarChart = () => {
   const [options, setOptions] = useState({
     // Data: Data to be displayed in the chart
     data: [
@@ -23,6 +23,23 @@ const ChartExample = () => {
     ],
     // Series: Defines which chart type and data to use
     series: [{ type: "bar", xKey: "month", yKey: "iceCreamSales" }],
+  });
+  return <AgCharts options={options} />;
+};
+
+const LineChart = () => {
+  const [options, setOptions] = useState({
+    // Data: Data to be displayed in the chart
+    data: [
+      { month: "Jan", avgTemp: 2.3, iceCreamSales: 162000 },
+      { month: "Mar", avgTemp: 6.3, iceCreamSales: 302000 },
+      { month: "May", avgTemp: 16.2, iceCreamSales: 800000 },
+      { month: "Jul", avgTemp: 22.8, iceCreamSales: 1254000 },
+      { month: "Sep", avgTemp: 14.5, iceCreamSales: 950000 },
+      { month: "Nov", avgTemp: 8.9, iceCreamSales: 200000 },
+    ],
+    // Series: Defines which chart type and data to use
+    series: [{ type: "line", xKey: "month", yKey: "iceCreamSales" }],
   });
   return <AgCharts options={options} />;
 };
@@ -66,7 +83,7 @@ export default function Dashboard() {
                 <Col lg={16}>
                 <Card style={{ width: "100%"}} title="Performance">
                     <div style={{ height: 320 }}>
-                        <ChartExample />
+                        <LineChart />
                     </div>
                 </Card>
             </Col>
@@ -74,7 +91,7 @@ export default function Dashboard() {
             <Col lg={8}>
                 <Card style={{ width: "100%" }} title="Dividends">
                     <div style={{ height: 320}}>
-                        <ChartExample />
+                        <BarChart />
                     </div>
                 </Card>
             </Col>
