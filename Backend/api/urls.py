@@ -19,5 +19,5 @@ router.register(r"stock-prices", StockPriceViewSet, basename = 'stockPrices')
 urlpatterns = [
     path("", include(router.urls)),
     path("auth/register/", register),
-    path("auth/me", me)
+    path("auth/me/", me)
 ]

@@ -21,9 +21,9 @@ export default function Accounts() {
     }, [access]);
 
     return (
-        <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]} justify="center">
             <Col lg={16}>
-                <Card style={{ width: "100%" }} title="Account Information">
+                <Card style={{ width: "100%" }}>
                     <Avatar shape="square" size={64} icon={<UserOutlined />} />
                     <div style={{ height: 320 }}>
                         Account Info Here: Todo by Aidan

@@ -42,11 +42,20 @@ def register(request):
     return Response({"id": user.id, "username": user.username}, status=status.HTTP_201_CREATED)
 
 # Login / Obtain Current User
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me(request):
-    user = getattr(request.user, "user_account", None)
-    return Response({'id': request.user.id, 'username': request.user.username, 'accountId': user.account_id})
+    user = request.user
+
+    account_id = None
+    if hasattr(user, "user_account"):
+        account_id = user.user_account.account.id
+
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "account": account_id
+    }, status=status.HTTP_200_OK)
 
 
 # Generic views for getting and setting data

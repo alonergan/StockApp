@@ -28,7 +28,7 @@ class AccountHoldingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountHolding
-        fields = ["id", "account", "stock", "ticker", "stockName", "currentlyHeld"]
+        fields = ["id", "account", "stock", "ticker", "stockName", "quantity", "currentlyHeld"]
 
 class TradeSerializer(serializers.ModelSerializer):
     ticker = serializers.CharField(source="stock.ticker", read_only=True)
@@ -36,7 +36,7 @@ class TradeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Trade
-        fields = ["id", "account", "stock", "ticker", "stockName", "timeStamp", "price", "method"]
+        fields = ["id", "account", "stock", "ticker", "stockName", "timeStamp", "price", "quantity", "method"]
 
 class StockPriceSerializer(serializers.ModelSerializer):
     ticker = serializers.CharField(source="stock.ticker", read_only=True)
