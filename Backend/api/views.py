@@ -144,7 +144,7 @@ class AccountHoldingViewSet(viewsets.ModelViewSet):
             AccountHolding.objects
             .select_related("stock")
             .filter(account=account)
-            .order_by("id")
+            .order_by("stock__ticker")
         )
 
     @action(detail=False, methods=["get"])
@@ -154,7 +154,7 @@ class AccountHoldingViewSet(viewsets.ModelViewSet):
             AccountHolding.objects
             .select_related("stock")
             .filter(account=account, currentlyHeld=True)
-            .order_by("id")
+            .order_by("stock__ticker")
         )
         return Response(self.get_serializer(qs, many=True).data)
 
