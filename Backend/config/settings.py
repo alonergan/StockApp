@@ -60,14 +60,20 @@ MIDDLEWARE = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    "https://*.azurestaticapps.net",
     "https://cosc540-stockapp-backend.azurewebsites.net",
-    "https://polite-coast-0b912d710.4.azurestaticapps.net"
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/.*\.azurestaticapps\.net$",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://polite-flower-065219010.2.azurestaticapps.net'
+    'https://polite-flower-065219010.2.azurestaticapps.net',
+    'https://polite-coast-0b912d710.4.azurestaticapps.net',
+    r"^https:\/\/.*\.azurestaticapps\.net$",
 ]
 
 ROOT_URLCONF = 'config.urls'
