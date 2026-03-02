@@ -29,6 +29,10 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 
+ALLOWED_HOSTS += [
+    "cosc540-stockapp-backend.azurewebsites.net",
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,6 +57,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://cosc540-stockapp-backend.azurewebsites.net",
+    "https://polite-coast-0b912d710.4.azurestaticapps.net"
 ]
 
 CORS_ALLOWED_ORIGINS = [
