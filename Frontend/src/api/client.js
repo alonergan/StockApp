@@ -6,3 +6,12 @@ export const api = axios.create({
         "Content-Type": "application/json"
     }
 });
+
+// Intercept requests and add JWT token
+api.interceptors.request.use((config) => {
+    const access = localStorage.getItem("access");
+    if (access) {
+        config.headers.Authorization = `Bearer ${access}`;
+    }
+    return config;
+});

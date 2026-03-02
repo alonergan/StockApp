@@ -1,27 +1,55 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Menu, Button, Typography, Space, Layout } from "antd"
+import { DashboardOutlined, WalletOutlined, LogoutOutlined, LoginOutlined } from "@ant-design/icons";
+
+const { Header } = Layout
+const { Text } = Typography;
 
 export default function NavBar() {
     const { me, logout } = useAuth();
     const nav = useNavigate();
+    const location = useLocation();
 
     function onLogout() {
         logout();
         nav("/login");
     }
 
-    return (
-        <header style={{ borderBottom: "1px solid var(--border)", background: "rgba(17,26,46,0.7)", backdropFilter: "blur(10px)" }}>
-            <div className="container" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px" }}>
-                <strong>StockApp</strong>
-                <Link to="/dashboard" style={{ color: "var(--text)", textDecoration: "none" }}>Dashboard</Link>
-                <Link to="/accounts" style={{ color: "var(--text)", textDecoration: "none" }}>Accounts</Link>
+    const navBarItems = [
+        { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+        { key: "/accounts", icon: <WalletOutlined />, label: "Accounts" },
+    ];
 
-                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: "var(--muted)" }}>{me?.username ?? "Dev"}</span>
-                    {me && <button className="btn secondary" onClick={onLogout}>Logout</button>}
-                </div>
-            </div>
-        </header>
+    const selectedKeys = navBarItems
+        .map((i) => i.key)
+        .filter((k) => location.pathname.startsWith(k));
+
+    return (
+        <div style={{ display: "flex", alignItems: "center", gap: 16, width: "100%" }}>
+            <div style={{ color: "white", fontWeight: 700, marginRight: 8 }}>StockApp</div>
+
+            <Menu
+                theme="dark"
+                mode="horizontal"
+                items={navBarItems}
+                selectedKeys={selectedKeys.length ? selectedKeys : ["/dashboard"]}
+                onClick={({ key }) => nav(key)}
+                style={{ flex: 1, minWidth: 0 }}
+            />
+
+            <Space>
+                <Text style={{ color: "rgba(255,255,255,0.75)" }}>{me?.username ?? "Dev"}</Text>
+                {me ? (
+                    <Button icon={<LogoutOutlined />} onClick={onLogout}>
+                        Logout
+                    </Button>
+                ) : (
+                    <Button icon={<LoginOutlined />} onClick={() => nav("/login")}>
+                        Login
+                    </Button>
+                )}
+            </Space>
+        </div>
     );
 }

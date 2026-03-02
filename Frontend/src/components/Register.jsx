@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthShell from "./AuthShell"
-//import { registerUser } from "../api/auth";
+import { registerUser } from "../api/auth";
 
 export default function Register() {
     const nav = useNavigate();
     const [form, setForm] = useState({
         username: "",
         password: "",
-        startBalance: "",
+        startBalance: "1000.00",
         riskLevel: 1,
         thresholdPercentage: "100.00"
     });
@@ -21,6 +21,7 @@ export default function Register() {
 
     async function onSubmitForm(e) {
         // TODO
+        registerUser(form);
         e.preventDefault();
         nav("/login");
     }
