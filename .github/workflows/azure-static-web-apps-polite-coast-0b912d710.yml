@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - Deployment
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - Deployment
 
 jobs:
   build_and_deploy_job:
