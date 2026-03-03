@@ -101,25 +101,6 @@ export default function Dashboard() {
                 </Card>
                 </Col>
             <Col lg={8}>
-                <Card style={{ width: "100%" }} title="Profits/Loss">
-                    <div style={{ height: 320}}>
-                        <BarChart />
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={16}>
-                <Card style={{ width: "100%"}} title="APPL">
-                     <div style={{ height: 20}}>  
-                        {holdingData.map((h) => (
-                        <div key={h.id}>
-                            <Text>{h.ticker}: {h.quantity}</Text>
-                        </div>
-                    ))}
-                    </div>
-                    <LineStock/>
-                </Card> 
-            </Col>
-            <Col lg={8}>
                 <Card style={{ width: "100%" }} title="Current Holdings">
                     <div style={{ height: 320}}>
                              {/* This example shows how to list all of the data from the holding array */}
