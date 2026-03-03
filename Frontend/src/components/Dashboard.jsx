@@ -4,7 +4,6 @@ import React, { useEffect,useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AgCharts } from "ag-charts-react";
 import { getCurrentHoldings } from '../api/holdings';
-import { getLatestStockPrice } from '../api/stockPrices';
 
 import { AllCommunityModule, ModuleRegistry, LegendModule, CategoryAxisModule,
         LineSeriesModule, NumberAxisModule} from "ag-charts-community";

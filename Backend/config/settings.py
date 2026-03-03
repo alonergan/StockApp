@@ -73,7 +73,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://polite-flower-065219010.2.azurestaticapps.net',
     'https://polite-coast-0b912d710.4.azurestaticapps.net',
-    r"^https:\/\/.*\.azurestaticapps\.net$",
+    'https://static2.finnhub.io'
 ]
 
 ROOT_URLCONF = 'config.urls'
