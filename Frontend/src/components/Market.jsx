@@ -6,6 +6,29 @@ import { getLatestStockPrice } from '../api/finnhub/stocks';
 
 const { Title, Text } = Typography;
 
+const tickers = [
+    "AAPL",   // Apple
+    "MSFT",   // Microsoft
+    "GOOGL",  // Alphabet (Class A)
+    "AMZN",   // Amazon
+    "NVDA",   // NVIDIA
+    "META",   // Meta Platforms
+    "TSLA",   // Tesla
+    "BRK.B",  // Berkshire Hathaway (Class B)
+    "JPM",    // JPMorgan Chase
+    "JNJ",    // Johnson & Johnson
+    "V",      // Visa
+    "PG",     // Procter & Gamble
+    "XOM",    // Exxon Mobil
+    "UNH",    // UnitedHealth Group
+    "MA",     // Mastercard
+    "HD",     // Home Depot
+    "LLY",    // Eli Lilly
+    "AVGO",   // Broadcom
+    "COST",   // Costco
+    "KO"      // Coca-Cola
+]
+
 export default function Market() {
     const { me } = useAuth();
 
@@ -16,94 +39,170 @@ export default function Market() {
     const [stockPriceByTicker, setStockPriceByTicker] = useState({}); // This holds all of the prices for the current account holdings { AAPL: {price, timestamp, ...}, ... }
 
 
-    /**
-     * This will be the main function that runs when the component loads, here I have set it to
-     * 1) Load the accounts current holdings
-     * 2) Get the latest stock prices for the current holdings
-     */
     useEffect(() => {
         async function load() {
-            /** 
-             * 1) Load the current holdings for the account
-             */
-            const holdings = await getCurrentHoldings();
-            setHoldingData(holdings);
+            // Optional: keep if you need it before prices resolve
+            setHoldingData(tickers);
 
-            /**
-             * 2) Get the stock prices for each ticker in the current holdings
-             */
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-            // Get an array of tickers from the current holdings
-            const tickers = [...new Set(holdings.map((holding) => holding.ticker).filter(Boolean))]; // Array of all the tickers from holdings
+            const results = [];
 
-            // Call getLatestStockPrice for all elements in array tickers, wait till all responses are received/resolved before continuing (.allSettled)
-            const results = await Promise.allSettled(
-                tickers.map(async (ticker) => {
-                    var result = await getLatestStockPrice(ticker);
-                    var price = result.c;
-                    return [ticker, price];
-                })
-            );
+            for (let i = 0; i < tickers.length; i++) {
+                const ticker = tickers[i];
 
-            // Now we need to map the data into the state and make sure there are no rejected responses (null or missing data)
-            const cleaned = {};
-            for (const result of results) {
-                if (result.status === "fulfilled") {
-                    const [ticker, price] = result.value;
-                    cleaned[ticker] = price;
+                try {
+                    const result = await getLatestStockPrice(ticker);
+                    const price = result?.c;
+                    const change = result?.d;
+                    const percentChange = result?.dp;
+                    const highPrice = result?.h;
+                    const lowPrice = result?.l;
+                    const openPrice = result?.o;
+                    const previousClose = result?.pc;
+
+                    results.push({
+                        status: "fulfilled",
+                        value: [ticker, price, change, percentChange, highPrice, lowPrice, openPrice, previousClose]
+                    });
+                } catch (err) {
+                    results.push({
+                        status: "rejected",
+                        reason: err
+                    });
+                }
+
+                // Space requests 100ms apart (skip delay after last one)
+                if (i < tickers.length - 1) {
+                    await delay(100);
                 }
             }
 
-            // Set the state with the ticker price data
+            const cleaned = {};
+            for (const r of results) {
+                if (r.status === "fulfilled") {
+                    const [ticker, price, change, percentChange, highPrice, lowPrice, openPrice, previousClose] = r.value;
+                    if (price != null) {
+                        cleaned[ticker] = {
+                            price: Number(price),
+                            change: change != null ? Number(change) : null,
+                            percentChange: percentChange != null ? Number(percentChange) : null,
+                            highPrice: highPrice != null ? Number(highPrice) : null,
+                            lowPrice: lowPrice != null ? Number(lowPrice) : null,
+                            openPrice: openPrice != null ? Number(lowPrice) : null,
+                            previousClose: previousClose != null ? Number(previousClose) : null
+                        };
+                    }
+                }
+            }
             setStockPriceByTicker(cleaned);
         }
+
         load();
     }, []);
 
     // This combines the data into a single holding information object with latest prices and quantity we can use to easily display in the table
-    const getHoldingsTableRows = useMemo(() => {
-        return holdingData.map((holding) => {
-            const price = stockPriceByTicker[holding.ticker] !== undefined ? Number(stockPriceByTicker[holding.ticker]) : null;
-            const quantity = holding?.quantity !== undefined ? Number(holding.quantity) : null;
+    const holdingsTableRows = useMemo(() => {
+        return holdingData.map((ticker) => {
+            const data = stockPriceByTicker[ticker];
 
             return {
-                key: holding.id,
-                ticker: holding.ticker,
-                quantity: quantity,
-                price: price,
-                value: price * quantity,
+                key: ticker,
+                ticker,
+                price: data?.price ?? null,
+                change: data?.change ?? null,
+                percentChange: data?.percentChange ?? null,
+                lowPrice: data?.lowPrice ?? null,
+                highPrice: data?.highPrice ?? null,
+                openPrice: data?.openPrice ?? null,
+                previousClose: data?.previousClose ?? null
             };
         });
     }, [holdingData, stockPriceByTicker]);
 
-    // This shows how to render the holding table columnsbv
-    const getHoldingsTableColumns = [
+    // columns: use the rows var above
+    const holdingsTableColumns = [
         { title: "Ticker", dataIndex: "ticker", key: "ticker" },
         {
-            title: "Quantity", dataIndex: "quantity", key: "quantity",
-            render: (num) => (num === null ? "ERR" : num)
+            title: "Current Price",
+            dataIndex: "price",
+            key: "price",
+            align: "right",
+            render: (num) => (num == null ? "..." : `$${num.toFixed(2)}`),
         },
         {
-            title: "Current Price", dataIndex: "price", key: "price",
-            render: (num) => (num === null ? "ERR" : `$${num.toFixed(2)}`)
+            title: "Change",
+            dataIndex: "change",
+            key: "change",
+            align: "right",
+            render: (num) => {
+                if (num == null) return "...";
+                const color = num > 0 ? "green" : num < 0 ? "red" : "inherit";
+                return (
+                    <span style={{ color }}>
+                        {num > 0 ? "+" : ""}
+                        {num.toFixed(2)}
+                    </span>
+                );
+            },
         },
         {
-            title: "Total Value", dataIndex: "value", key: "value",
-            render: (num) => (num === null ? "ERR" : `$${num.toFixed(2)}`)
-        }
+            title: "Percent Change",
+            dataIndex: "percentChange",
+            key: "percentChange",
+            align: "right",
+            render: (num) => {
+                if (num == null) return "...";
+                const color = num > 0 ? "green" : num < 0 ? "red" : "inherit";
+                return (
+                    <span style={{ color }}>
+                        {num > 0 ? "+" : ""}
+                        {num.toFixed(2)}%
+                    </span>
+                );
+            },
+        },
+        {
+            title: "Low Price",
+            dataIndex: "highPrice",
+            key: "highPrice",
+            align: "right",
+            render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        },
+        {
+            title: "High Price",
+            dataIndex: "lowPrice",
+            key: "lowPrice",
+            align: "right",
+            render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        },
+        {
+            title: "Open Price",
+            dataIndex: "openPrice",
+            key: "openPrice",
+            align: "right",
+            render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        },
+        {
+            title: "Previous Close Price",
+            dataIndex: "previousClose",
+            key: "previousClose",
+            align: "right",
+            render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        },
     ];
 
     return (
         <Row gutter={[16, 16]}>
             { /* Example card to show table containing the account holdings and their current prices */}
             <Col lg={24}>
-                <Card style={{ width: "100%" }} title="Account Holdings">
+                <Card style={{ width: "100%", height: "100%" }}>
                     <Table
-                        columns={getHoldingsTableColumns}
-                        dataSource={getHoldingsTableRows}
+                        columns={holdingsTableColumns}
+                        dataSource={holdingsTableRows}
                         pagination={false} // We want this to be scrollable
-                        size="small"
-                        scroll={{ y: 260 }}
+                        size="large"
+                        scroll={{ y: "100%" }}
                     />
                 </Card>
             </Col>
