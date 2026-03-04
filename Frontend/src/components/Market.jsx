@@ -1,109 +1,27 @@
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button, Table } from "antd";
-import React, { useEffect, useState, useMemo } from "react";
-import { getCurrentHoldings } from '../api/holdings';
-import { getLatestStockPrice } from '../api/finnhub/stocks';
+import { Card, Col, Row, Typography, Button, Table, Spin } from "antd";
+import React, { useEffect, useMemo } from "react"; 
+import { useMarket } from "../context/MarketContext";
 
 const { Title, Text } = Typography;
 
-const tickers = [
-    "AAPL",   // Apple
-    "MSFT",   // Microsoft
-    "GOOGL",  // Alphabet (Class A)
-    "AMZN",   // Amazon
-    "NVDA",   // NVIDIA
-    "META",   // Meta Platforms
-    "TSLA",   // Tesla
-    "BRK.B",  // Berkshire Hathaway (Class B)
-    "JPM",    // JPMorgan Chase
-    "JNJ",    // Johnson & Johnson
-    "V",      // Visa
-    "PG",     // Procter & Gamble
-    "XOM",    // Exxon Mobil
-    "UNH",    // UnitedHealth Group
-    "MA",     // Mastercard
-    "HD",     // Home Depot
-    "LLY",    // Eli Lilly
-    "AVGO",   // Broadcom
-    "COST",   // Costco
-    "KO"      // Coca-Cola
-]
-
 export default function Market() {
-    const { me } = useAuth();
-
-    /**
-     *  These are your states, they hold the data currently displayed by the component
-     */
-    const [holdingData, setHoldingData] = useState([]) // This holds all of the current account holdings
-    const [stockPriceByTicker, setStockPriceByTicker] = useState({}); // This holds all of the prices for the current account holdings { AAPL: {price, timestamp, ...}, ... }
-
+    const {
+        tickers,
+        stockPriceByTicker,
+        loading,
+        loadMarket,
+    } = useMarket();
 
     useEffect(() => {
-        async function load() {
-            // Optional: keep if you need it before prices resolve
-            setHoldingData(tickers);
-
-            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-            const results = [];
-
-            for (let i = 0; i < tickers.length; i++) {
-                const ticker = tickers[i];
-
-                try {
-                    const result = await getLatestStockPrice(ticker);
-                    const price = result?.c;
-                    const change = result?.d;
-                    const percentChange = result?.dp;
-                    const highPrice = result?.h;
-                    const lowPrice = result?.l;
-                    const openPrice = result?.o;
-                    const previousClose = result?.pc;
-
-                    results.push({
-                        status: "fulfilled",
-                        value: [ticker, price, change, percentChange, highPrice, lowPrice, openPrice, previousClose]
-                    });
-                } catch (err) {
-                    results.push({
-                        status: "rejected",
-                        reason: err
-                    });
-                }
-
-                // Space requests 100ms apart (skip delay after last one)
-                if (i < tickers.length - 1) {
-                    await delay(100);
-                }
-            }
-
-            const cleaned = {};
-            for (const r of results) {
-                if (r.status === "fulfilled") {
-                    const [ticker, price, change, percentChange, highPrice, lowPrice, openPrice, previousClose] = r.value;
-                    if (price != null) {
-                        cleaned[ticker] = {
-                            price: Number(price),
-                            change: change != null ? Number(change) : null,
-                            percentChange: percentChange != null ? Number(percentChange) : null,
-                            highPrice: highPrice != null ? Number(highPrice) : null,
-                            lowPrice: lowPrice != null ? Number(lowPrice) : null,
-                            openPrice: openPrice != null ? Number(lowPrice) : null,
-                            previousClose: previousClose != null ? Number(previousClose) : null
-                        };
-                    }
-                }
-            }
-            setStockPriceByTicker(cleaned);
+        if (Object.keys(stockPriceByTicker).length === 0) {
+            loadMarket();
         }
-
-        load();
-    }, []);
-
+    }, [stockPriceByTicker, loadMarket]);
+    
     // This combines the data into a single holding information object with latest prices and quantity we can use to easily display in the table
     const holdingsTableRows = useMemo(() => {
-        return holdingData.map((ticker) => {
+        return tickers.map((ticker) => {
             const data = stockPriceByTicker[ticker];
 
             return {
@@ -115,20 +33,27 @@ export default function Market() {
                 lowPrice: data?.lowPrice ?? null,
                 highPrice: data?.highPrice ?? null,
                 openPrice: data?.openPrice ?? null,
-                previousClose: data?.previousClose ?? null
+                previousClose: data?.previousClose ?? null,
             };
         });
-    }, [holdingData, stockPriceByTicker]);
+    }, [tickers, stockPriceByTicker]);
 
     // columns: use the rows var above
     const holdingsTableColumns = [
-        { title: "Ticker", dataIndex: "ticker", key: "ticker" },
+        {
+            title: "Ticker",
+            dataIndex: "ticker",
+            key: "ticker",
+            defaultSortOrder: "ascend",
+            sorter: (a, b) => a.ticker.localeCompare(b.ticker),
+        },
         {
             title: "Current Price",
             dataIndex: "price",
             key: "price",
             align: "right",
-            render: (num) => (num == null ? "..." : `$${num.toFixed(2)}`),
+            render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+            sorter: (a, b) => a.price - b.price,
         },
         {
             title: "Change",
@@ -136,7 +61,7 @@ export default function Market() {
             key: "change",
             align: "right",
             render: (num) => {
-                if (num == null) return "...";
+                if (num == null) return "--";
                 const color = num > 0 ? "green" : num < 0 ? "red" : "inherit";
                 return (
                     <span style={{ color }}>
@@ -145,6 +70,7 @@ export default function Market() {
                     </span>
                 );
             },
+            sorter: (a, b) => a.change - b.change,
         },
         {
             title: "Percent Change",
@@ -152,7 +78,7 @@ export default function Market() {
             key: "percentChange",
             align: "right",
             render: (num) => {
-                if (num == null) return "...";
+                if (num == null) return "--";
                 const color = num > 0 ? "green" : num < 0 ? "red" : "inherit";
                 return (
                     <span style={{ color }}>
@@ -161,20 +87,23 @@ export default function Market() {
                     </span>
                 );
             },
+            sorter: (a, b) => a.percentChange - b.percentChange,
         },
         {
-            title: "Low Price",
+            title: "High Price",
             dataIndex: "highPrice",
             key: "highPrice",
             align: "right",
             render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+            sorter: (a, b) => a.highPrice - b.lowPrice,
         },
         {
-            title: "High Price",
+            title: "Low Price",
             dataIndex: "lowPrice",
             key: "lowPrice",
             align: "right",
             render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+            sorter: (a, b) => a.lowPrice - b.lowPrice,
         },
         {
             title: "Open Price",
@@ -182,6 +111,7 @@ export default function Market() {
             key: "openPrice",
             align: "right",
             render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+            sorter: (a, b) => a.openPrice - b.openPrice,
         },
         {
             title: "Previous Close Price",
@@ -189,22 +119,24 @@ export default function Market() {
             key: "previousClose",
             align: "right",
             render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+            sorter: (a, b) => a.previousClose - b.previousClose,
         },
     ];
 
     return (
         <Row gutter={[16, 16]}>
-            { /* Example card to show table containing the account holdings and their current prices */}
             <Col lg={24}>
-                <Card style={{ width: "100%", height: "100%" }}>
-                    <Table
-                        columns={holdingsTableColumns}
-                        dataSource={holdingsTableRows}
-                        pagination={false} // We want this to be scrollable
-                        size="large"
-                        scroll={{ y: "100%" }}
-                    />
-                </Card>
+                <Spin spinning={loading}>
+                    <Card style={{ width: "100%", height: "100%" }}>
+                        <Table
+                            columns={holdingsTableColumns}
+                            dataSource={holdingsTableRows}
+                            pagination={false} // We want this to be scrollable
+                            size="large"
+                            scroll={{ y: "100%" }}
+                        />
+                    </Card>
+                </Spin>
             </Col>
         </Row>
     );

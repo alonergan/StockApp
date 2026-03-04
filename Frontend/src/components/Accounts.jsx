@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button, Avatar, Statistic, Modal, InputNumber, message } from "antd";
+import { Card, Col, Row, Typography, Button, Avatar, Statistic, Modal, InputNumber, message, Spin } from "antd";
 import { UserOutlined } from '@ant-design/icons';
 import { getMyAccount } from "../api/accounts";
 import { deposit, withdraw } from "../api/accounts";
@@ -12,13 +12,27 @@ export default function Accounts() {
     const [amount, setAmount] = useState(0);
     const [openDeposit, setOpenDeposit] = useState(false);
     const [openWithdraw, setOpenWithdraw] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let alive = true;
+
         async function load() {
-            const a = await getMyAccount();
-            setAccount(a);
+            setLoading(true);
+            try {
+                const a = await getMyAccount();
+                if (alive) setAccount(a);
+            } catch (e) {
+                message.error("Failed to load account");
+            } finally {
+                if (alive) setLoading(false);
+            }
         }
+
         load();
+        return () => {
+            alive = false;
+        };
     }, []);
 
     const { gainPct, gainColor, gainPrefix, riskColor } = useMemo(() => {
@@ -27,7 +41,7 @@ export default function Accounts() {
         }
 
         const start = Number(account.startBalance);
-        const current = Number(account.balance); // NOTE: your field is "balance", not "currentBalance"
+        const current = Number(account.balance); 
         const pct = start > 0 ? ((current - start) / start) * 100 : 0;
 
         const isGain = pct >= 0;
@@ -49,7 +63,7 @@ export default function Accounts() {
     async function handleDeposit() {
         try {
             const updated = await deposit(account.id, amount);
-            setAccount(updated);            // updates UI instantly
+            setAccount(updated);            
             setOpenDeposit(false);
             setAmount(0);
         } catch (e) {
@@ -64,7 +78,6 @@ export default function Accounts() {
             setOpenWithdraw(false);
             setAmount(0);
         } catch (e) {
-            // If backend returns ValidationError, you can show that message
             const msg = e?.response?.data?.amount?.[0] ?? "Withdraw failed";
             message.error(msg);
         }
@@ -84,89 +97,87 @@ export default function Accounts() {
                         </div>
                     </div>
 
-                    {!account ? (
-                        <Text type="secondary">Loading...</Text>
-                    ) : (
-                            <div>
-                                <Row gutter={[16, 16]} justify="center">
-                                    <Col lg={12}>
-                                        <Card style={{ width: "100%" }}>
-                                            <Statistic title="Start Balance" value={account.startBalance} precision={2} prefix="$"/>
-                                        </Card>
-                                    </Col>
+                    <div>
+                        <Spin spinning={loading}>
+                            <Row gutter={[16, 16]} justify="center">
+                                <Col lg={12}>
+                                    <Card style={{ width: "100%" }}>
+                                        <Statistic title="Start Balance" value={account?.startBalance} precision={2} prefix="$"/>
+                                    </Card>
+                                </Col>
 
-                                    <Col lg={12}>
-                                        <Card style={{ width: "100%" }}>
-                                            <Statistic title="Current Balance" value={account.balance} precision={2} prefix="$"/>
-                                        </Card>
-                                    </Col>
+                                <Col lg={12}>
+                                    <Card style={{ width: "100%" }}>
+                                        <Statistic title="Current Balance" value={account?.balance} precision={2} prefix="$"/>
+                                    </Card>
+                                </Col>
 
-                                    <Col lg={8} >
-                                        <Card style={{ width: "100%" }}>
-                                            <Statistic
-                                                title="Gain/Loss"
-                                                value={gainPct}
-                                                precision={2}
-                                                suffix="%"
-                                                valueStyle={{ color: gainColor }}
-                                                prefix={gainPrefix}
-                                            />
-                                        </Card>
-                                    </Col>
+                                <Col lg={8} >
+                                    <Card style={{ width: "100%" }}>
+                                        <Statistic
+                                            title="Gain/Loss"
+                                            value={gainPct}
+                                            precision={2}
+                                            suffix="%"
+                                            valueStyle={{ color: gainColor }}
+                                            prefix={gainPrefix}
+                                        />
+                                    </Card>
+                                </Col>
 
-                                    <Col lg={8}>
-                                        <Card style={{ width: "100%" }}>
-                                            <Statistic title="Withdrawal Threshold" value={account.thresholdPercentage} precision={2} suffix="%" />
-                                        </Card>
-                                    </Col>
+                                <Col lg={8}>
+                                    <Card style={{ width: "100%" }}>
+                                        <Statistic title="Withdrawal Threshold" value={account?.thresholdPercentage} precision={2} suffix="%" />
+                                    </Card>
+                                </Col>
 
-                                    <Col lg={8} xs={24}>
-                                        <Card style={{ width: "100%" }}>
-                                            <Statistic
-                                                title="Risk Level"
-                                                value={Number(account.riskLevel)}
-                                                valueStyle={{ color: riskColor }}
-                                            />
-                                        </Card>
-                                    </Col>
+                                <Col lg={8} xs={24}>
+                                    <Card style={{ width: "100%" }}>
+                                        <Statistic
+                                            title="Risk Level"
+                                            value={Number(account?.riskLevel)}
+                                            valueStyle={{ color: riskColor }}
+                                        />
+                                    </Card>
+                                </Col>
 
-                                    <Col lg={6} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                        <Button
-                                            onClick={() => setOpenWithdraw(true)}
-                                        >
-                                            Withdrawal
-                                        </Button>
-                                    </Col>
+                                <Col lg={6} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Button
+                                        onClick={() => setOpenWithdraw(true)}
+                                    >
+                                        Withdrawal
+                                    </Button>
+                                </Col>
 
-                                    <Col lg={6} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                        <Button
-                                            onClick={() => setOpenDeposit(true)}
-                                        >
-                                            Deposit
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <Modal
-                                    title="Deposit"
-                                    open={openDeposit}
-                                    onOk={handleDeposit}
-                                    onCancel={() => setOpenDeposit(false)}
-                                    okText="Deposit"
-                                >
-                                    <InputNumber min={0} style={{ width: "100%" }} value={amount} onChange={setAmount} />
-                                </Modal>
+                                <Col lg={6} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Button
+                                        onClick={() => setOpenDeposit(true)}
+                                    >
+                                        Deposit
+                                    </Button>
+                                </Col>
+                            </Row>
+                            <Modal
+                                title="Deposit"
+                                open={openDeposit}
+                                onOk={handleDeposit}
+                                onCancel={() => setOpenDeposit(false)}
+                                okText="Deposit"
+                            >
+                                <InputNumber min={0} style={{ width: "100%" }} value={amount} onChange={setAmount} />
+                            </Modal>
 
-                                <Modal
-                                    title="Withdraw"
-                                    open={openWithdraw}
-                                    onOk={handleWithdrawal}
-                                    onCancel={() => setOpenWithdraw(false)}
-                                    okText="Withdraw"
-                                >
-                                    <InputNumber min={0} style={{ width: "100%" }} value={amount} onChange={setAmount} />
-                                </Modal>
-                        </div>
-                    )}
+                            <Modal
+                                title="Withdraw"
+                                open={openWithdraw}
+                                onOk={handleWithdrawal}
+                                onCancel={() => setOpenWithdraw(false)}
+                                okText="Withdraw"
+                            >
+                                <InputNumber min={0} style={{ width: "100%" }} value={amount} onChange={setAmount} />
+                            </Modal>
+                        </Spin>
+                    </div>
                 </Card>
             </Col>
         </Row>

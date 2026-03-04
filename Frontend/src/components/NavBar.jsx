@@ -18,8 +18,8 @@ export default function NavBar() {
 
     const navBarItems = [
         { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-        { key: "/accounts", icon: <WalletOutlined />, label: "Accounts" },
-        { key: "/market", icon: <BankOutlined />, label: "Market" }
+        { key: "/market", icon: <BankOutlined />, label: "Market" },
+        { key: "/accounts", icon: <WalletOutlined />, label: "Account" },
     ];
 
     const selectedKeys = navBarItems
