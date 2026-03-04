@@ -9,6 +9,7 @@ import { Layout, theme } from "antd";
 import React from "react";
 import Market from "./components/Market";
 import { MarketProvider } from "./context/MarketContext";
+import Trades from "./components/Trades"
 
 // Bypass environment rule to allow us to not use login for development
 const BYPASS_AUTH = true; // import.meta.env.VITE_BYPASS_AUTH === "true";
@@ -47,6 +48,7 @@ export default function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/accounts" element={<Accounts />} />
                     <Route path="/market" element={<Market />} />
+                    <Route path="/trades" element={<Trades />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
