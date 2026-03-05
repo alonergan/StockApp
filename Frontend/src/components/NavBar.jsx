@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Menu, Button, Typography, Space, Layout } from "antd"
-import { DashboardOutlined, WalletOutlined, LogoutOutlined, LoginOutlined } from "@ant-design/icons";
+import { DashboardOutlined, WalletOutlined, BankOutlined, LogoutOutlined, LoginOutlined, DollarOutlined } from "@ant-design/icons";
 
 const { Header } = Layout
 const { Text } = Typography;
@@ -18,7 +18,9 @@ export default function NavBar() {
 
     const navBarItems = [
         { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-        { key: "/accounts", icon: <WalletOutlined />, label: "Accounts" },
+        { key: "/market", icon: <BankOutlined />, label: "Market" },
+        { key: "/accounts", icon: <WalletOutlined />, label: "Account" },
+        { key: "/trades", icon: <DollarOutlined />, label: "Trades"},
     ];
 
     const selectedKeys = navBarItems

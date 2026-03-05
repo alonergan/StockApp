@@ -85,45 +85,29 @@ await getHoldings({ ordering: "id" });
 
 ---
 
-# stockPrices.js
+# finnhub/stocks.js
 
-Handles stock price historical data queries.
-
-Public endpoint (no authentication required)
-
----
-
-## getStockPrices(options)
-
-GET /api/stock-prices/
-
-Query Parameters:
-
-- ticker (preferred)
-- stockId (internal DB id)
-- start (ISO datetime)
-- end (ISO datetime)
-- ordering (default "timeStamp")
-
-Examples:
-
-await getStockPrices({ ticker: "AAPL" });
-
-await getStockPrices({
-  ticker: "AAPL",
-  start: "2024-01-01T00:00:00Z",
-  end: "2024-12-31T00:00:00Z"
-});
+Live stock data is pulled from Finnhub. Do not utilize the database Stock table anymore
 
 ---
 
 ## getLatestStockPrice(options)
 
-Returns the most recent stock price for a stock ticker.
+Get real-time quote data for US stocks. Constant polling is not recommended. Use websocket if you need real-time updates.
 
 Example:
 
-const latest = await getLatestStockPrice({ ticker: "AAPL" });
+                    var result = await getLatestStockPrice(ticker);
+                    var price = result.c;
+
+Response Attributes:
+- c - Current price
+- d - Change
+- dp - Percent change
+- h - High price of the day
+- l - Low price of the day
+- o - Open price of the day
+- pc - Previous close price
 
 ---
 
