@@ -1,11 +1,15 @@
-import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button, Table, Spin } from "antd";
-import React, { useEffect, useMemo } from "react"; 
+import { Card, Col, Row, Typography, Button, Table, Spin, Modal } from "antd";
+import React, { useEffect, useState, useMemo, useCallback } from "react"; 
 import { useMarket } from "../context/MarketContext";
+import StockInfoModal from "../components/StockInfoModal";
 
 const { Title, Text } = Typography;
 
 export default function Market() {
+
+    const [stockInfoModalOpen, setStockInfoModalOpen] = useState(false);
+    const [selectedTicker, setSelectedTicker] = useState(null);
+
     const {
         tickers,
         stockPriceByTicker,
@@ -19,7 +23,6 @@ export default function Market() {
         }
     }, [stockPriceByTicker, loadMarket]);
     
-    // This combines the data into a single holding information object with latest prices and quantity we can use to easily display in the table
     const holdingsTableRows = useMemo(() => {
         return tickers.map((ticker) => {
             const data = stockPriceByTicker[ticker];
@@ -38,13 +41,13 @@ export default function Market() {
         });
     }, [tickers, stockPriceByTicker]);
 
-    // columns: use the rows var above
     const holdingsTableColumns = [
         {
             title: "Ticker",
             dataIndex: "ticker",
             key: "ticker",
             defaultSortOrder: "ascend",
+            render: (ticker) => renderTickerColumn(ticker),
             sorter: (a, b) => a.ticker.localeCompare(b.ticker),
         },
         {
@@ -123,21 +126,47 @@ export default function Market() {
         },
     ];
 
+
+    const openStockInfo = useCallback((ticker) => {
+        setSelectedTicker(ticker);
+        setStockInfoModalOpen(true);
+    }, []);
+
+    const closeStockInfo = useCallback(() => {
+        setStockInfoModalOpen(false);
+    }, []);
+
+    const renderTickerColumn = useCallback(
+        (ticker) => (
+            <Button type="text" color="primary" onClick={() => openStockInfo(ticker)}>
+                {ticker}
+            </Button>
+        ),
+        [openStockInfo]
+    );
+
     return (
-        <Row gutter={[16, 16]}>
-            <Col lg={24}>
-                <Spin spinning={loading}>
-                    <Card style={{ width: "100%", height: "100%" }}>
-                        <Table
-                            columns={holdingsTableColumns}
-                            dataSource={holdingsTableRows}
-                            pagination={false} // We want this to be scrollable
-                            size="large"
-                            scroll={{ y: "100%" }}
-                        />
-                    </Card>
-                </Spin>
-            </Col>
-        </Row>
+        <>
+            <Row gutter={[16, 16]}>
+                <Col lg={24}>
+                    <Spin spinning={loading}>
+                        <Card style={{ width: "100%", height: "100%" }}>
+                            <Table
+                                columns={holdingsTableColumns}
+                                dataSource={holdingsTableRows}
+                                pagination={false} // We want this to be scrollable
+                                size="large"
+                                scroll={{ y: "100%" }}
+                            />
+                        </Card>
+                    </Spin>
+                </Col>
+            </Row>
+            <StockInfoModal
+            open={stockInfoModalOpen}
+            ticker={selectedTicker}
+            onClose={closeStockInfo}
+            />
+        </>
     );
 }

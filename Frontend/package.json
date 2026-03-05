@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.6.7",
     "ag-charts-community": "^13.1.0",
     "ag-charts-react": "^13.1.0",
     "antd": "^6.3.1",

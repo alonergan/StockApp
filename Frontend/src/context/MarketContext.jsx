@@ -5,8 +5,7 @@ import { getLatestStockPrice } from "../api/finnhub/stocks";
 const MarketContext = createContext();
 
 const tickers = [
-    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B", "JPM", "JNJ",
-    "V", "PG", "XOM", "UNH", "MA", "HD", "LLY", "AVGO", "COST", "KO"
+    "AAPL", "MSFT", "GOOGL", //"AMZN", "NVDA", "META", "TSLA", "BRK.B", "JPM", "JNJ", "V", "PG", "XOM", "UNH", "MA", "HD", "LLY", "AVGO", "COST", "KO"
 ];
 
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
