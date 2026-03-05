@@ -22,25 +22,19 @@ import { registerUser } from "../api/auth";
 const { Title, Text } = Typography;
 
 const riskOptions = [
-  { label: "Conservative", value: 1 },
-  { label: "Low", value: 2 },
-  { label: "Moderate", value: 3 },
-  { label: "High", value: 4 },
-  { label: "Aggressive", value: 5 },
+  { label: "Low", value: 1 },
+  { label: "Moderate", value: 2 },
+  { label: "High", value: 3 },
 ];
 
 function riskDescription(level) {
   switch (level) {
     case 1:
-      return "Conservative: fewer trades, smaller exposure, lower volatility tolerance.";
-    case 2:
       return "Low: cautious trading with limited exposure.";
-    case 3:
+    case 2:
       return "Moderate: balanced settings (recommended default).";
-    case 4:
+    case 3:
       return "High: more trades and higher exposure to volatility.";
-    case 5:
-      return "Aggressive: highest trade frequency/exposure; expect larger swings.";
     default:
       return "";
   }
@@ -89,10 +83,8 @@ export default function Register() {
         <Text>
           <b>Risk level</b> controls how aggressively the system trades.
         </Text>
-        <Text>{riskDescription(riskLevel)}</Text>
         <Text>
-          <b>Threshold %</b> is the minimum percent move/signal needed to trigger an action. Lower
-          threshold = more trades; higher threshold = fewer trades.
+          <b>Threshold %</b> defines when to stop automatic trading and divest all holdings allowing you to withdrawal your funds.
         </Text>
       </Space>
     );
@@ -102,7 +94,6 @@ export default function Register() {
     setError("");
     setSubmitting(true);
 
-    // ✅ IMPORTANT: send camelCase keys (your backend views.py expects these)
     const payload = {
       username: values.username,
       password: values.password,
@@ -213,7 +204,7 @@ export default function Register() {
                       <Col xs={24} sm={12} style={{ minWidth: 0 }}>
                         <Form.Item
                           label={
-                            <Tooltip title="Minimum threshold (%) needed to trigger actions. Lower = more trades; higher = fewer trades.">
+                            <Tooltip title="Minimum threshold (%) to trigger automatic divestment of all holdings">
                               Threshold %
                             </Tooltip>
                           }
@@ -245,6 +236,10 @@ export default function Register() {
                       <Segmented block options={riskOptions} onChange={(v) => setRiskLevel(v)} />
                     </Form.Item>
 
+                    <Space size="middle" style={{ display:"flex", justifyContent: "center", textAlign: "center", marginBottom: "20px"}}>
+                        <Text>{riskDescription(riskLevel)}</Text>
+                    </Space>
+
                     <Space direction="vertical" size="middle" style={{ width: "100%" }}>
                       <Button type="primary" htmlType="submit" block loading={submitting}>
                         Create account
@@ -274,7 +269,7 @@ export default function Register() {
                   <Alert
                     type="info"
                     showIcon
-                    message={`Current settings: Risk ${riskLevel}/5, Threshold ${thresholdPct}%`}
+                    message={`Current settings: Risk ${riskLevel}/3, Threshold ${thresholdPct}%`}
                     description="These settings can usually be changed later, but pick something reasonable to start."
                   />
 
@@ -287,8 +282,9 @@ export default function Register() {
                         label: "Simple rule of thumb",
                         children: (
                           <Text>
-                            Fewer trades → increase <b>Threshold %</b> or lower <b>Risk Level</b>. More
-                            trades → do the opposite.
+                            Cautious Investor -> <b>Low Risk Level</b><br />
+                            Balanced Investor -> <b>Moderate Risk Level</b><br />
+                            Risky Investor -> <b>High Risk Level</b>
                           </Text>
                         ),
                       },
