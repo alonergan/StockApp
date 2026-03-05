@@ -7,6 +7,8 @@ export async function registerUser(payload) {
 
 export async function loginUser(username, password) {
     const res = await api.post("/api/token/", { username, password })
+    localStorage.setItem("access", res.data.access);
+    localStorage.setItem("refresh", res.data.refresh);
     return res.data;
 }
 
