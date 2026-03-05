@@ -282,9 +282,9 @@ export default function Register() {
                         label: "Simple rule of thumb",
                         children: (
                           <Text>
-                            Cautious Investor -> <b>Low Risk Level</b><br />
-                            Balanced Investor -> <b>Moderate Risk Level</b><br />
-                            Risky Investor -> <b>High Risk Level</b>
+                                Cautious Investor {`->`} <b>Low Risk Level</b><br />
+                                Balanced Investor {`->`} <b>Moderate Risk Level</b><br />
+                                Risky Investor {`->`} <b>High Risk Level</b>
                           </Text>
                         ),
                       },
