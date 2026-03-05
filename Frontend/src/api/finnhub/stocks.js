@@ -1,14 +1,11 @@
-import * as finnhub from 'finnhub';
-
 const apiKey = 'd6j2dhpr01ql467i0s9gd6j2dhpr01ql467i0sa0';
 
-const finnhubClient = new finnhub.DefaultApi(apiKey);
+export async function getLatestStockPrice(ticker) {
+    const url = new URL("https://finnhub.io/api/v1/quote");
+    url.searchParams.set("symbol", ticker);
+    url.searchParams.set("token", apiKey);
 
-export const getLatestStockPrice = (ticker) => {
-    return new Promise((resolve, reject) => {
-        finnhubClient.quote(ticker, (error, data, response) => {
-            if (error) return reject(error);
-            resolve(data);
-        });
-    });
-};
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Finnhub request failed");
+    return await res.json();
+}
