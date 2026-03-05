@@ -16,6 +16,17 @@ const BYPASS_AUTH = true; // import.meta.env.VITE_BYPASS_AUTH === "true";
 
 const { Header, Content } = Layout;
 
+function PublicLayout() {
+    const { token } = theme.useToken();
+    return (
+        <Layout style={{ minHeight: "100vh" }}>
+            <Content style={{ padding: 16, background: token.colorBgLayout }}>
+                <Outlet />
+            </Content>
+        </Layout>
+    );
+}
+
 function ProtectedLayout() {
     const { me } = useAuth();
 
@@ -36,14 +47,16 @@ function ProtectedLayout() {
     );
 }
 
-
 export default function App() {
     return (
         <MarketProvider>
             <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route element={<PublicLayout />}>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                </Route>
+
                 <Route element={<ProtectedLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/accounts" element={<Accounts />} />
