@@ -7,6 +7,7 @@ import { getCurrentHoldings } from '../api/holdings';
 
 import { AllCommunityModule, ModuleRegistry, LegendModule, CategoryAxisModule,
         LineSeriesModule, NumberAxisModule} from "ag-charts-community";
+import { getLatestStockPrice } from "../api/finnhub/stocks";
 
 ModuleRegistry.registerModules([AllCommunityModule, CategoryAxisModule, LegendModule,LineSeriesModule,NumberAxisModule]);
 const { Title, Text} = Typography;
@@ -33,56 +34,12 @@ const LineChart = () => {
   return <AgCharts options={options} />;
 };
 
-const LineStock = () => {
-  const [options, setOptions] = useState({
-    // Data: Data to be displayed in the chart
-    data: [
-      { month: "Jan", Total: 100 },
-      { month: "Feb", Total: 104 },
-      { month: "Mar", Total: 120 },
-      { month: "Apr", Total: 115 },
-      { month: "Jun", Total: 120 },
-      { month: "Jul", Total: 120 },
-      { month: "Aug", Total: 125 },
-      { month: "Sep", Total: 120 },
-      { month: "Oct", Total: 116 },
-      { month: "Nov", Total: 115 },
-      { month: "Dec", Total: 110 },
-    ],
-    // Series: Defines which chart type and data to use
-    series: [{ type: "line", xKey: "month", yKey: "Total" }],
-  });
-  return <AgCharts options={options} />;
-};
-
-const BarChart = () => {
-  const [options, setOptions] = useState({
-    // Data: Data to be displayed in the chart
-    data: [
-      { month: "Jan", profit: -12 },
-      { month: "Feb", profit: 537 },
-      { month: "Mar", profit: -3 },
-      { month: "Apr", profit: -20 },
-      { month: "May", profit: -500 },
-      { month: "Jun", profit: 120 },
-      { month: "Jul", profit: -145 },
-      { month: "Aug", profit: 45 },
-      { month: "Sep", profit: 0 },
-      { month: "Oct", profit: 400 },
-      { month: "Nov", profit: 234 },
-      { month: "Nov", profit: 40 },
-    ],
-    // Series: Defines which chart type and data to use
-    series: [{ type: "bar", xKey: "month", yKey: "profit" }],
-  });
-  return <AgCharts options={options} />;
-};
 
 export default function Dashboard() {
     const { me } = useAuth();
-
     const [holdingData, setHoldingData] = useState([])
     const tickers = holdingData.map((holding) => holding.ticker);
+
     useEffect(() => {
         async function load() {
             const data = await getCurrentHoldings();
@@ -90,6 +47,38 @@ export default function Dashboard() {
         }
         load();
     }, []);
+
+
+    const [holdingTickerPrice, setTickerPrice] = useState([])
+    const prices = [];
+       //console.log(tickers);
+  //  const returnedPrices = holdingTickerPrice.map((price) => price.c);
+
+
+    useEffect(() => 
+    {
+            console.log(tickers[0]);
+
+            
+        async function getPrices(ticker) 
+        {
+            const value = await getLatestStockPrice(ticker);
+            console.log(value);
+            prices[i] = value.c;
+            setTickerPrice(ticker[i]);
+        } 
+        for (let i = 0; i < tickers.length; i++)
+        {
+            console.log(tickers[i])
+            getPrices(tickers[i]); 
+        }
+        
+    }, []);
+
+
+
+
+
   
     return (
         <Row gutter={[16, 16]}>
