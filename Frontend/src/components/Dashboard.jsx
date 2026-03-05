@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { AgCharts } from "ag-charts-react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
+import './Table.css';
 
 import {
     AllCommunityModule, ModuleRegistry, LegendModule, CategoryAxisModule,
@@ -35,9 +36,7 @@ const LineChart = () => {
 };
 
 export default function Dashboard() {
-    const { me } = useAuth();
     const [holdingData, setHoldingData] = useState([])
-    const [holdingTickerPrice, setTickerPrice] = useState([]);
     const [tickers, setTickers] = useState([]);
     const [prices, setPrices] = useState([]);
 
@@ -89,30 +88,30 @@ export default function Dashboard() {
         {
             ID: 1,
             TICKER: tickers[0],
-            QUANTITY: holdingData[0]?.quantity? Number(holdingData[0].quantity).toFixed(2): null,
-            CURRENT_PRICE: prices[0] ? prices[0].toFixed(2) : "ERR",
-            TOTAL_VALUE:   prices[0] ? (holdingData[0]?.quantity * prices[0]).toFixed(2) : "ERR"
+            QUANTITY: holdingData[0]?.quantity? Number(holdingData[0].quantity).toFixed(0): null,
+            CURRENT_PRICE: prices[0] != null? `$${prices[0].toFixed(2)}`: "ERR",
+            TOTAL_VALUE: prices[0] != null && holdingData[0]?.quantity != null? `$${(holdingData[0].quantity * prices[1]).toFixed(2)}`: "ERR"
         },
              {
             ID: 2,
             TICKER: tickers[1],
-            QUANTITY: holdingData[1]?.quantity? Number(holdingData[1].quantity).toFixed(2): null,
-            CURRENT_PRICE: prices[1] ? prices[1].toFixed(2) : "ERR",
-            TOTAL_VALUE:   prices[1] ? (holdingData[1]?.quantity * prices[1]).toFixed(2) : "ERR"
+            QUANTITY: holdingData[1]?.quantity? Number(holdingData[1].quantity).toFixed(0): null,
+            CURRENT_PRICE: prices[1] != null? `$${prices[1].toFixed(2)}`: "ERR",
+            TOTAL_VALUE: prices[1] != null && holdingData[1]?.quantity != null? `$${(holdingData[1].quantity * prices[1]).toFixed(2)}`: "ERR"
         },
              {
             ID: 3,
             TICKER: tickers[2],
-            QUANTITY: holdingData[2]?.quantity? Number(holdingData[2].quantity).toFixed(2): null,
-            CURRENT_PRICE: prices[2] ? prices[2].toFixed(2) : "ERR",
-            TOTAL_VALUE:   prices[2] ? (holdingData[2]?.quantity * prices[2]).toFixed(2) : "ERR"
+            QUANTITY: holdingData[2]?.quantity? Number(holdingData[2].quantity).toFixed(0): null,
+            CURRENT_PRICE: prices[2] != null? `$${prices[2].toFixed(2)}`: "ERR",
+            TOTAL_VALUE: prices[2] != null && holdingData[2]?.quantity != null? `$${(holdingData[2].quantity * prices[1]).toFixed(2)}`: "ERR"
         },
              {
             ID: 3,
             TICKER: tickers[3],
-            QUANTITY: holdingData[3]?.quantity? Number(holdingData[3].quantity).toFixed(2): null,
-            CURRENT_PRICE: prices[3] ? prices[0].toFixed(2) : "ERR",
-            TOTAL_VALUE:   prices[3] ? (holdingData[0]?.quantity * prices[3]).toFixed(2) : "ERR"
+            QUANTITY: holdingData[3]?.quantity? Number(holdingData[3].quantity).toFixed(0): null,
+            CURRENT_PRICE: prices[3] != null? `$${prices[3].toFixed(2)}`: "ERR",
+            TOTAL_VALUE: prices[3] != null && holdingData[3]?.quantity != null? `$${(holdingData[3].quantity * prices[1]).toFixed(2)}`: "ERR"
         },
     ]
             
