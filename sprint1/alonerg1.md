@@ -1,5 +1,7 @@
 # Aidan Lonergan - Sprint 1 Reflection
 
+Aidan Lonergan, alonergan, aflonergan@gmail.com, StockApp Group
+
 ## What I Planned To Do
 - Implement the database and create the schema and models inside Django
 - Implement Django API to consume basic financial data from alphaVantage and get and set database information
