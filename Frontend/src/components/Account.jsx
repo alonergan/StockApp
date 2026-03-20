@@ -6,7 +6,7 @@ import { getMyAccount } from "../api/accounts";
 import { deposit, withdraw } from "../api/accounts";
 const { Title, Text } = Typography;
 
-export default function Accounts() {
+export default function Account() {
     const { me } = useAuth();
     const [account, setAccount] = useState(null);
     const [amount, setAmount] = useState(0);
