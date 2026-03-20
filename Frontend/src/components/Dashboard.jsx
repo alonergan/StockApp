@@ -116,79 +116,40 @@ export default function Dashboard() {
     ]
             
     return (
-        <Row gutter={[16, 16]}>
-            <Col lg={16}>
-                <Card style={{ width: "100%" }} title="Investing">
-                    <div style={{ height: 320 }}>
-                        <LineChart />
-                    </div>
-                </Card>
-            </Col>
-                 <Col lg={8}>
-                <Card style={{ width: "100%" }} title="Current Holdings">
-                <table style={{ height: 320 }}>
-                    <thead>
-                        <tr>
-                            {headers.map((header, index) => (
-                                <th key={index}>
-                                    <span>{header.LABEL}</span>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                     {data.map((row, index) => (
-                        <tr key={index}>
-                            {headers.map((header, index) => {
-                                return (
-                                <td key={index}>
-                                    {row[header.KEY]}
-                                </td>
-                                )
-                            })}
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[0]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[0]?.quantity)}</p>
-                        <p>Current Price: ${prices[0] ? prices[0].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[0] ? (holdingData[0]?.quantity * prices[0]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[1]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[1]?.quantity)}</p>
-                        <p>Current Price: ${prices[1] ? prices[1].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[1] ? (30 * prices[1]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[2]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[2]?.quantity)}</p>
-                        <p>Current Price: ${prices[2] ? prices[2].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[2] ? (50 * prices[2]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[3]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[2]?.quantity)}</p>
-                        <p>Current Price: ${prices[3] ? prices[3].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[3] ? (50 * prices[3]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>            
-        </Row>
+        <>
+            { /* Rows are 24 units wide */ }
+            <Row gutter={[16, 16]}>
+                { /* Row 1 [Principle, Current Balance, Gains/Losses, Risk Level */ }
+                <Col span={7}>
+                    <Card style={{ width: "100%" }} title="Principle"/>
+                </Col>
+                <Col span={7}>
+                    <Card style={{ width: "100%" }} title="Current Balance" />
+                </Col>
+                <Col span={7}>
+                    <Card style={{ width: "100%" }} title="Total Gains/Losses" />
+                </Col>
+                <Col span={3}>
+                    <Card style={{ width: "100%" }} title="Risk Level" />
+                </Col>
 
+                { /* Row 2 [Account Standings Chart, Holdings Diversity Pie Chart] */ }
+                <Col span={16}>
+                    <Card style={{ width: "100%", height: "100%" }} title="Account Standings Chart" />
+                </Col>
+
+                <Col span={8}>
+                    <Card style={{ width: "100%" }} title="Holdings Diversity Pie Chart" />
+                </Col>
+
+                { /* Row 3 [Account Holdings Table, Recent Trades Table] */}
+                <Col span={12}>
+                    <Card style={{ width: "100%" }} title="Account Holdings Table" />
+                </Col>
+                <Col span={12}>
+                    <Card style={{ width: "100%" }} title="Recent Trades Table" />
+                </Col>
+            </Row>
+        </>
     );
 }
