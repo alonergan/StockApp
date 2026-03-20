@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Menu, Button, Typography, Space, Layout } from "antd"
-import { DashboardOutlined, WalletOutlined, BankOutlined, LogoutOutlined, LoginOutlined, DollarOutlined } from "@ant-design/icons";
+import { Menu, Button, Typography, Space, Layout, Avatar, Dropdown } from "antd"
+import { DashboardOutlined, WalletOutlined, BankOutlined, LogoutOutlined, LoginOutlined, DollarOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Header } = Layout
 const { Text } = Typography;
@@ -18,40 +18,85 @@ export default function NavBar() {
 
     const navBarItems = [
         { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-        { key: "/market", icon: <BankOutlined />, label: "Market" },
-        { key: "/accounts", icon: <WalletOutlined />, label: "Account" },
         { key: "/trades", icon: <DollarOutlined />, label: "Trades"},
+        { key: "/market", icon: <BankOutlined />, label: "Market" },
+    ];
+
+    const accountMenuItems = [
+        { key: "account-overview", icon: <UserOutlined />, label: "Account Overview" },
+        { type: "divider", },
+        { key: "logout", icon: <LogoutOutlined />, label: "Logout", danger: true, },
     ];
 
     const selectedKeys = navBarItems
-        .map((i) => i.key)
-        .filter((k) => location.pathname.startsWith(k));
+        .filter((item) => location.pathname.startsWith(item.key))
+        .map((item) => item.key);
+
+    function handleAccountMenuClick({ key }) {
+        if (key === "account-overview") nav("/account");
+        if (key === "logout") onLogout();
+    }
+
 
     return (
-        <div style={{ display: "flex", alignItems: "center", gap: 16, width: "100%" }}>
-            <div style={{ color: "white", fontWeight: 700, marginRight: 8 }}>StockApp</div>
+        <Header
+            style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 24px",
+            }}
+        >
+            <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                <div
+                    style={{
+                        color: "white",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        marginRight: 24,
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    Stock App
+                </div>
 
-            <Menu
-                theme="dark"
-                mode="horizontal"
-                items={navBarItems}
-                selectedKeys={selectedKeys.length ? selectedKeys : ["/dashboard"]}
-                onClick={({ key }) => nav(key)}
-                style={{ flex: 1, minWidth: 0 }}
-            />
+                <Menu
+                    theme="dark"
+                    mode="horizontal"
+                    items={navBarItems}
+                    selectedKeys={selectedKeys}
+                    onClick={({ key }) => nav(key)}
+                    style={{ flex: 1, minWidth: 0, borderBottom: "none" }}
+                />
+            </div>
 
-            <Space>
-                <Text style={{ color: "rgba(255,255,255,0.75)" }}>{me?.username ?? "Dev"}</Text>
+            <Space size="middle" style={{ marginLeft: 16 }}>
+                <Text style={{ color: "rgba(255,255,255,0.75)" }}>
+                    {me?.username ?? "Dev"}
+                </Text>
+
                 {me ? (
-                    <Button icon={<LogoutOutlined />} onClick={onLogout}>
-                        Logout
-                    </Button>
+                    <Dropdown
+                        menu={{
+                            items: accountMenuItems,
+                            onClick: handleAccountMenuClick,
+                        }}
+                        trigger={["click"]}
+                        placement="bottomRight"
+                    >
+                        <Avatar
+                            icon={<UserOutlined />}
+                            style={{ cursor: "pointer" }}
+                        />
+                    </Dropdown>
                 ) : (
-                    <Button icon={<LoginOutlined />} onClick={() => nav("/login")}>
-                        Login
-                    </Button>
+                    <Avatar
+                        icon={<LoginOutlined />}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => nav("/login")}
+                    />
                 )}
             </Space>
-        </div>
+        </Header>
     );
 }
