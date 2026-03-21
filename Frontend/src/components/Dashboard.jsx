@@ -1,7 +1,8 @@
 import { useAuth } from "../context/AuthContext";
 import { Card, Col, Row, Typography, Button } from "antd";
+import { Pie } from "@ant-design/charts"; 
+
 import React, { useEffect, useState } from "react";
-import { AgCharts } from "ag-charts-react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
 export default function Dashboard() {
@@ -15,14 +16,15 @@ export default function Dashboard() {
             const data = await getCurrentHoldings();
             setHoldingData(data);
 
-            const prices = [];
+            const newPrices = [];
+            const newTickers = [];
+            
 
             for (let i = 0; i < data.length; i++)
             {
-                tickers[i]= (data[i].ticker);
-                const value = await getLatestStockPrice(data[i].ticker);
-                const price = value.c;
-                prices[i] = price;
+                newTickers.push(data[i].ticker);
+                const stockPrice = await getLatestStockPrice(data[i].ticker);
+                newPrices.push(stockPrice.c);
 
             } 
             setPrices(prices);
