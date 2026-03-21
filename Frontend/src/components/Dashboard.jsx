@@ -33,6 +33,20 @@ export default function Dashboard() {
         load();
     }, []);
 
+//Building out my Data
+const pieChartData = holdingData.map((item, index) => {
+     
+    const price = Number(prices[index]);
+
+    if ( price == undefined || price == null) return null;
+    const quantity = Number(item.quantity);
+    return {
+        type: item.ticker,
+        price: price,
+        value: price * quantity,
+    }
+}).filter(Boolean);
+
 
             
     return (
