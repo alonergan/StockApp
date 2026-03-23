@@ -1,6 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import { Card, Col, Row, Typography, Button } from "antd";
-import { Pie } from "@ant-design/charts"; 
+import { Pie, Line } from "@ant-design/charts"; 
 import { useEffect, useState } from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
@@ -57,11 +57,11 @@ export default function Dashboard() {
     const quantity = Number(item.quantity) || 0;
     //Setting value to two decimal places
     const totValue = Math.round(price * quantity * 100) / 100; 
-    const testPrice = Number(price);
+    const convertedPrice = Number(price);
     // Return formatted object for chart
     return {
         type: item.ticker,    
-        price: testPrice,    
+        price: convertedPrice,    
         value: totValue,               
     };
 
@@ -106,6 +106,36 @@ export default function Dashboard() {
         },
     };
 
+    //simulating 3 monthes of data for Account Balance
+    const lineData = [
+    { date: "2025-01-02", balance: 10000 },
+    { date: "2025-01-15", balance: 11000 },
+    { date: "2025-01-22", balance: 11020 },
+    { date: "2025-01-28", balance: 12000 },
+    { date: "2025-02-12", balance: 12670 },
+    { date: "2025-02-20", balance: 13670 },
+    { date: "2025-02-30", balance: 12670 },
+    { date: "2025-03-04", balance: 11000 },
+    { date: "2025-03-15", balance: 12000 },
+    { date: "2025-03-25", balance: 15000 },
+  ];
+
+  //Configuring Line graph
+  const lineChartConfig = {
+    data: lineData,
+    xField: "date",
+    yField: "balance",
+    smooth: true,
+    theme: "dark",
+    autoFit: true,
+    height: 480, 
+
+    point: {
+      size: 4,
+      shape: "circle",
+    },
+  };
+
     return (
         <>
             <Row gutter={[16, 16]}>
@@ -123,12 +153,16 @@ export default function Dashboard() {
                     <Card style={{ width: "100%" }} title="Risk Level" />
                 </Col>
                 {/* Row 2 */}
-                <Col span={16}>
-                    <Card 
-                        style={{ width: "100%", height: "100%" }} 
-                        title="Account Standings Chart" 
-                    />
-                </Col>
+                  <Col xs={24} lg={16}>
+                <Card
+                  title="Account Standings Chart"
+                  style={{ background: "#141414", color: "#fff" }}
+                >
+                  <div style={{ width: "100%", height: 480 }}>
+                    <Line {...lineChartConfig} />
+                  </div>
+                </Card>
+              </Col>
                 <Col span={8}>
                     <Card
                     style={{ width: "100%", background: "#141414", color: "#fff" }}
