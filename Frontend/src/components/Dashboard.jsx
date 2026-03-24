@@ -200,7 +200,7 @@ const tableColumns = useMemo(() => [
                 {/* Row 2 */}
                 <Col span = {16}>
                 <Card
-                  title="Account Standings Chart"
+                  title="Account Standings"
                   style={{ background: "#141414", color: "#fff" }}
                 >
                   <div style={{ width: "100%", height: 480 }}>
