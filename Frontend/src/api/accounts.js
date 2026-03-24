@@ -19,3 +19,8 @@ export async function withdraw(accountId, amount) {
     const res = await api.post(`/api/accounts/${accountId}/withdraw/`, { amount });
     return res.data;
 }
+
+export async function getStandings() {
+    const res = await api.get(`/api/account-standings/`);
+    return res.data;
+}
