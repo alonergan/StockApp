@@ -1,7 +1,7 @@
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button } from "antd";
-import { Pie, Line } from "@ant-design/charts"; 
-import { useEffect, useState } from "react";
+import { Card, Col, Row, Typography, Button, Table } from "antd";
+import { Pie, Line} from "@ant-design/charts"; 
+import { useEffect, useState, useMemo} from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
 
@@ -48,7 +48,8 @@ export default function Dashboard() {
 
 
     // Build pie data
-    const pieChartData = holdingData.map((item, index) => {
+    const pieChartData = useMemo(() => {
+    return holdingData.map((item, index) => {
     // Get price 
     const price = Number(prices[index]);
     //Checking for availability of price
@@ -64,14 +65,13 @@ export default function Dashboard() {
         price: convertedPrice,    
         value: totValue,               
     };
-
     }).filter(Boolean); // remove null entries
-
+    }, [holdingData, prices]);
     // is my pieData available
     const pieDataAvailable = pieChartData.length > 0;
 
     // Pie Chart logic and configurations
-    const pieChartConfig = {
+    const pieChartConfig = useMemo(() =>  ({
         data: pieChartData,
         //Slices shows price * quantity of ticker
         angleField: "value",
@@ -99,12 +99,10 @@ export default function Dashboard() {
             // Setting price to two decimal places
             return `${text} ($${price.toFixed(2)})`;
             },
-            style: {
-                fill: "#fff",
+            style: { fill: "#fff",},
             },
         },
-        },
-    };
+    }),[pieChartData]);
 
     //simulating 3 monthes of data for Account Balance
     const lineData = [
@@ -121,20 +119,67 @@ export default function Dashboard() {
   ];
 
   //Configuring Line graph
-  const lineChartConfig = {
-    data: lineData,
-    xField: "date",
-    yField: "balance",
-    smooth: true,
-    theme: "dark",
-    autoFit: true,
-    height: 480, 
+const lineChartConfig = useMemo(() => ({
+  data: lineData,
+  xField: "date",
+  yField: "balance",
+  smooth: true,
+  theme: "dark",
+  autoFit: true,
+  height: 480,
+  point: {
+    size: 4,
+    shape: "circle",
+  },
+}), []);
 
-    point: {
-      size: 4,
-      shape: "circle",
-    },
-  };
+//Configuring table Data
+const tableData = useMemo(() => { 
+  return holdingData.map((item, index) => {
+    const price = Number(prices[index]) || 0;
+    const quantity = Number(item.quantity) || 0;
+
+    return {
+      key: item.ticker,
+      type: item.ticker,
+      quantity,
+      price,
+      value: Math.round(price * quantity * 100) / 100,
+    };
+  });
+}, [holdingData, prices]);
+
+//Table Column Formatting
+const tableColumns = useMemo(() => [
+  {
+    title: "Ticker",
+    dataIndex: "type",
+    key: "ticker",
+    defaultSortOrder: "ascend",
+    align: "center",
+    sorter: (a, b) => a.type.localeCompare(b.type),
+  },
+  {
+    title: "Shares",
+    dataIndex: "quantity",
+    align: "center",
+    sorter: (a, b) => (a.quantity ?? 0) - (b.quantity ?? 0),
+  },
+  {
+    title: "Price",
+    dataIndex: "price",
+    align: "center",
+    render: (val) => `$${(val || 0).toFixed(2)}`,
+    sorter: (a, b) => (a.price ?? 0) - (b.price ?? 0),
+  },
+  {
+    title: "Value",
+    dataIndex: "value",
+    align: "center",
+    render: (val) => `$${(val || 0).toLocaleString()}`,
+    sorter: (a, b) => (a.value ?? 0) - (b.value ?? 0),
+  },
+], []);
 
     return (
         <>
@@ -153,7 +198,7 @@ export default function Dashboard() {
                     <Card style={{ width: "100%" }} title="Risk Level" />
                 </Col>
                 {/* Row 2 */}
-                  <Col xs={24} lg={16}>
+                <Col span = {16}>
                 <Card
                   title="Account Standings Chart"
                   style={{ background: "#141414", color: "#fff" }}
@@ -177,12 +222,21 @@ export default function Dashboard() {
                 </Col>
                 {/* Row 3 */}
                 <Col span={12}>
-                    <Card style={{ width: "100%" }} title="Account Holdings Table" />
+                <Card
+                    style={{ width: "100%", height: "100%"}}
+                    title="Account Holdings">
+                <Table
+                    dataSource={tableData}
+                    columns={tableColumns}
+                    pagination={false}
+                    size="large"
+                    scroll={{ y: "100%" }}
+                />
+                </Card>   
                 </Col>
                 <Col span={12}>
                     <Card style={{ width: "100%" }} title="Recent Trades Table" />
                 </Col>
-
             </Row>
         </>
     );
