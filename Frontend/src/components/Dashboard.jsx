@@ -1,125 +1,187 @@
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button } from "antd";
-import React, { useEffect, useState } from "react";
-import { AgCharts } from "ag-charts-react";
+import { Card, Col, Row, Typography, Button, Table } from "antd";
+import { Pie, Line} from "@ant-design/charts"; 
+import { useEffect, useState, useMemo} from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
-import '../Table.css';
+import { getStandings } from "../api/accounts";
 
-import {
-    AllCommunityModule, ModuleRegistry, LegendModule, CategoryAxisModule,
-    LineSeriesModule, NumberAxisModule
-} from "ag-charts-community";
-
-ModuleRegistry.registerModules([AllCommunityModule, CategoryAxisModule, LegendModule, LineSeriesModule, NumberAxisModule]);
-const { Title, Text } = Typography;
-
-//Line Chart for Current Ammount investing, currently only static data
-const LineChart = () => {
-    const [options, setOptions] = useState({
-        data: [
-            { month: "Jan", deposit: 0, Total: 10000 },
-            { month: "Feb", deposit: 63, Total: 10600 },
-            { month: "Mar", deposit: 200, Total: 10830 },
-            { month: "Apr", deposit: 100, Total: 10200 },
-            { month: "Jun", deposit: 150, Total: 10500 },
-            { month: "Jul", deposit: 150, Total: 11540 },
-            { month: "Aug", deposit: 300, Total: 13540 },
-            { month: "Sep", deposit: 1000, Total: 9500 },
-            { month: "Oct", deposit: 500, Total: 9500 },
-            { month: "Nov", deposit: 150, Total: 10200 },
-            { month: "Dec", deposit: 200, Total: 11500 },
-        ],
-        series: [{ type: "line", xKey: "month", yKey: "Total" }],
-    });
-    return <AgCharts options={options} />;
-};
 
 export default function Dashboard() {
-    const [holdingData, setHoldingData] = useState([])
+    //Setters
+    const [holdingData, setHoldingData] = useState([]);
     const [tickers, setTickers] = useState([]);
     const [prices, setPrices] = useState([]);
+    const [line, setLine] = useState([]);
 
-    //The following will be for collecting our live data from our API
     useEffect(() => {
-        async function load() {
-            const data = await getCurrentHoldings();
-            setHoldingData(data);
+    async function load() {
 
-            const prices = [];
+    // Get holdings from django
+    const data = await getCurrentHoldings();
+    const standings = await getStandings();
 
-            for (let i = 0; i < data.length; i++)
-            {
-                tickers[i]= (data[i].ticker);
-                const value = await getLatestStockPrice(data[i].ticker);
-                const price = value.c;
-                prices[i] = price;
+    // Saving holding data
+    setHoldingData(data);
 
-            } 
-            setPrices(prices);
-            setTickers(tickers);
+    //mapping array for x and y axis then sorting and setting
+    
+    const newLine = standings
+      .map((item) => ({
+        date: new Date(item.timeStamp),
+        balance: Number(item.balance),
+    }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      setLine(newLine);
+
+    // Temp holder for prices
+    const newPrices = [];
+
+    // Loop through each holding
+    for (let i = 0; i < data.length; i++) {
+        // Save ticker symbol
+        tickers.push(data[i].ticker);
+
+        // Fetch latest price for that ticker
+        const price = await getLatestStockPrice(data[i].ticker);
+
+        //Save ticker price
+        newPrices.push(price.c);
         }
+        // Sets price and tickers
+        setPrices(newPrices);
+        setTickers(tickers);
+        }
+        
         load();
-    }, []);
+        
+    }, [tickers]); 
 
-    const headers = [
-        {
-        id: 1,
-        KEY: "TICKER",
-        LABEL: "Ticker",
-        },
-        {
-        id: 2,
-        KEY: "QUANTITY",
-        LABEL: "Quantity",
-        },
-        {id: 3,
-        KEY: "CURRENT_PRICE",
-        LABEL: "Current Price",
-        },
-        {id: 4,
-        KEY: "TOTAL_VALUE",
-        LABEL: "Total Value",
+    // Build pie data
+    const pieChartData = useMemo(() => {
+    return holdingData.map((item, index) => {
+    // Get price 
+    const price = Number(prices[index]);
+    //Checking for availability of price
+    if (price === undefined || price === null) return null;
+    // Ensure quantity is a number 
+    const quantity = Number(item.quantity) || 0;
+    //Setting value to two decimal places
+    const totValue = Math.round(price * quantity * 100) / 100; 
+    const convertedPrice = Number(price);
+    // Return formatted object for chart
+    return {
+        type: item.ticker,    
+        price: convertedPrice,    
+        value: totValue,               
+    };
+    }).filter(Boolean); // remove null entries
+    }, [holdingData, prices]);
+    // is my pieData available
+    const pieDataAvailable = pieChartData.length > 0;
+
+    // Pie Chart logic and configurations
+    const pieChartConfig = useMemo(() =>  ({
+        data: pieChartData,
+        //Slices shows price * quantity of ticker
+        angleField: "value",
+        colorField: "type",
+        radius: 1,        
+        innerRadius: 0.6, 
+        theme: "dark",
+        //Shows ticker prices inside pie chart slices
+        label: {
+            text: (data) => 
+                `$${data.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}\n${data.type}`,
+            style: {
+                fill: "#fff", 
+            },
         },
 
-    ];
+        legend: {
+            position: "bottom",
+            itemName: {
+            formatter: (text) => {
+            // get data for tickers
+            const found = pieChartData.find(data => data.type === text);
+            // If no price, set to 0
+            const price = found?.price || 0;
+            // Setting price to two decimal places
+            return `${text} ($${price.toFixed(2)})`;
+            },
+            style: { fill: "#fff",},
+            },
+        },
+    }),[pieChartData]);
 
-    const data = [
-        {
-            ID: 1,
-            TICKER: tickers[0],
-            QUANTITY: holdingData[0]?.quantity? Number(holdingData[0].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[0] != null? `$${prices[0].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[0] != null && holdingData[0]?.quantity != null? `$${(holdingData[0].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 2,
-            TICKER: tickers[1],
-            QUANTITY: holdingData[1]?.quantity? Number(holdingData[1].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[1] != null? `$${prices[1].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[1] != null && holdingData[1]?.quantity != null? `$${(holdingData[1].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 3,
-            TICKER: tickers[2],
-            QUANTITY: holdingData[2]?.quantity? Number(holdingData[2].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[2] != null? `$${prices[2].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[2] != null && holdingData[2]?.quantity != null? `$${(holdingData[2].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 3,
-            TICKER: tickers[3],
-            QUANTITY: holdingData[3]?.quantity? Number(holdingData[3].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[3] != null? `$${prices[3].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[3] != null && holdingData[3]?.quantity != null? `$${(holdingData[3].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-    ]
-            
+  //Configuring Line graph
+  const lineChartConfig = useMemo(() => ({
+  data: line,
+  xField: "date",
+  yField: "balance",
+  smooth: true,
+  theme: "dark",
+  autoFit: true,
+  height: 480,
+  point: {
+    size: 4,
+    shape: "circle",
+  },
+}), [line]
+);
+
+//Configuring table Data
+const tableData = useMemo(() => { 
+  return holdingData.map((item, index) => {
+    const price = Number(prices[index]) || 0;
+    const quantity = Number(item.quantity) || 0;
+
+    return {
+      key: item.ticker,
+      type: item.ticker,
+      quantity,
+      price,
+      value: Math.round(price * quantity * 100) / 100,
+    };
+  });
+}, [holdingData, prices]);
+
+//Table Column Formatting
+const tableColumns = useMemo(() => [
+  {
+    title: "Ticker",
+    dataIndex: "type",
+    key: "ticker",
+    defaultSortOrder: "ascend",
+    align: "center",
+    sorter: (a, b) => a.type.localeCompare(b.type),
+  },
+  {
+    title: "Shares",
+    dataIndex: "quantity",
+    align: "center",
+    sorter: (a, b) => (a.quantity ?? 0) - (b.quantity ?? 0),
+  },
+  {
+    title: "Price",
+    dataIndex: "price",
+    align: "center",
+    render: (val) => `$${(val || 0).toFixed(2)}`,
+    sorter: (a, b) => (a.price ?? 0) - (b.price ?? 0),
+  },
+  {
+    title: "Value",
+    dataIndex: "value",
+    align: "center",
+    render: (val) => `$${(val || 0).toLocaleString()}`,
+    sorter: (a, b) => (a.value ?? 0) - (b.value ?? 0),
+  },
+], []);
+
     return (
         <>
-            { /* Rows are 24 units wide */ }
             <Row gutter={[16, 16]}>
-                { /* Row 1 [Principle, Current Balance, Gains/Losses, Risk Level */ }
+                {/* Row 1: Summary cards */}
                 <Col span={7}>
                     <Card style={{ width: "100%" }} title="Principle"/>
                 </Col>
@@ -132,19 +194,42 @@ export default function Dashboard() {
                 <Col span={3}>
                     <Card style={{ width: "100%" }} title="Risk Level" />
                 </Col>
-
-                { /* Row 2 [Account Standings Chart, Holdings Diversity Pie Chart] */ }
-                <Col span={16}>
-                    <Card style={{ width: "100%", height: "100%" }} title="Account Standings Chart" />
-                </Col>
-
+                {/* Row 2 */}
+                <Col span = {16}>
+                <Card
+                  title="Account Standings"
+                  style={{ background: "#141414", color: "#fff" }}
+                >
+                  <div style={{ width: "100%", height: 480 }}>
+                    <Line {...lineChartConfig} />
+                  </div>
+                </Card>
+              </Col>
                 <Col span={8}>
-                    <Card style={{ width: "100%" }} title="Holdings Diversity Pie Chart" />
+                    <Card
+                    style={{ width: "100%", background: "#141414", color: "#fff" }}
+                    title="Holdings Diversity"
+                    >
+                    {pieDataAvailable ? (
+                        <Pie {...pieChartConfig} />
+                    ) : (
+                        <p style={{ color: "#fff" }}>Loading chart...</p>
+                    )}
+                    </Card>
                 </Col>
-
-                { /* Row 3 [Account Holdings Table, Recent Trades Table] */}
+                {/* Row 3 */}
                 <Col span={12}>
-                    <Card style={{ width: "100%" }} title="Account Holdings Table" />
+                <Card
+                    style={{ width: "100%", height: "100%"}}
+                    title="Account Holdings">
+                <Table
+                    dataSource={tableData}
+                    columns={tableColumns}
+                    pagination={false}
+                    size="large"
+                    scroll={{ y: "100%" }}
+                />
+                </Card>   
                 </Col>
                 <Col span={12}>
                     <Card style={{ width: "100%" }} title="Recent Trades Table" />
