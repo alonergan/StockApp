@@ -8,17 +8,10 @@ import { getStandings } from "../api/accounts";
 
 
 export default function Dashboard() {
-
-    //holdings 
+    //Setters
     const [holdingData, setHoldingData] = useState([]);
-
-    //grabbing tickers
     const [tickers, setTickers] = useState([]);
-
-    //sets prices for tickers
     const [prices, setPrices] = useState([]);
-
-    //set Line data
     const [line, setLine] = useState([]);
 
     useEffect(() => {
@@ -28,11 +21,11 @@ export default function Dashboard() {
     const data = await getCurrentHoldings();
     const standings = await getStandings();
 
-      console.log(standings);
     // Saving holding data
     setHoldingData(data);
 
     //mapping array for x and y axis then sorting and setting
+    
     const newLine = standings
       .map((item) => ({
         date: new Date(item.timeStamp),
@@ -62,7 +55,7 @@ export default function Dashboard() {
         
         load();
         
-    }, []); 
+    }, [tickers]); 
 
     // Build pie data
     const pieChartData = useMemo(() => {
