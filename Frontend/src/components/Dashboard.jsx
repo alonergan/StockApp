@@ -4,6 +4,8 @@ import { Pie, Line} from "@ant-design/charts";
 import { useEffect, useState, useMemo} from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
+import { getStandings } from "../api/accounts";
+
 
 export default function Dashboard() {
 
@@ -16,14 +18,28 @@ export default function Dashboard() {
     //sets prices for tickers
     const [prices, setPrices] = useState([]);
 
+    //set Line data
+    const [line, setLine] = useState([]);
+
     useEffect(() => {
     async function load() {
 
     // Get holdings from django
     const data = await getCurrentHoldings();
+    const standings = await getStandings();
 
+      console.log(standings);
     // Saving holding data
     setHoldingData(data);
+
+    //mapping array for x and y axis then sorting and setting
+    const newLine = standings
+      .map((item) => ({
+        date: new Date(item.timeStamp),
+        balance: Number(item.balance),
+    }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      setLine(newLine);
 
     // Temp holder for prices
     const newPrices = [];
@@ -43,7 +59,9 @@ export default function Dashboard() {
         setPrices(newPrices);
         setTickers(tickers);
         }
+        
         load();
+        
     }, []); 
 
 
@@ -104,23 +122,9 @@ export default function Dashboard() {
         },
     }),[pieChartData]);
 
-    //simulating 3 monthes of data for Account Balance
-    const lineData = [
-    { date: "2025-01-02", balance: 10000 },
-    { date: "2025-01-15", balance: 11000 },
-    { date: "2025-01-22", balance: 11020 },
-    { date: "2025-01-28", balance: 12000 },
-    { date: "2025-02-12", balance: 12670 },
-    { date: "2025-02-20", balance: 13670 },
-    { date: "2025-02-30", balance: 12670 },
-    { date: "2025-03-04", balance: 11000 },
-    { date: "2025-03-15", balance: 12000 },
-    { date: "2025-03-25", balance: 15000 },
-  ];
-
   //Configuring Line graph
-const lineChartConfig = useMemo(() => ({
-  data: lineData,
+  const lineChartConfig = useMemo(() => ({
+  data: line,
   xField: "date",
   yField: "balance",
   smooth: true,
@@ -131,7 +135,8 @@ const lineChartConfig = useMemo(() => ({
     size: 4,
     shape: "circle",
   },
-}), []);
+}), [line]
+);
 
 //Configuring table Data
 const tableData = useMemo(() => { 
