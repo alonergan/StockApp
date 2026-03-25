@@ -200,6 +200,7 @@ export default function Dashboard() {
                 type: item.ticker,
                 price: convertedPrice,
                 value: totValue,
+                quantity: quantity
             };
         }).filter(Boolean); // remove null entries
     }, [holdingData, prices]);
@@ -259,8 +260,8 @@ export default function Dashboard() {
             tooltip: {
                 items: [
                 (d) => ({
-                name: d.type,
-            value: `${(d.percent * 100).toFixed(2)}%`,
+                        name: d.type,
+                        value: `Quantity: ${d.quantity} <br/> Current Price: $${(d.price).toFixed(2)} <br/> Total Value: $${(d.value).toFixed(2)}  <br/> Percentage of Holdings: ${(d.percent * 100).toFixed(2)}%`,
                 }),
             ],
         },
