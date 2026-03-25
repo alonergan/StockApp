@@ -64,7 +64,6 @@ export default function Dashboard() {
         
     }, []); 
 
-
     // Build pie data
     const pieChartData = useMemo(() => {
     return holdingData.map((item, index) => {
