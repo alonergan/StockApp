@@ -2,7 +2,7 @@ import { Navigate, Route, Routes, Outlet } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
-import Accounts from "./components/Accounts";
+import Account from "./components/Account";
 import NavBar from "./components/NavBar";
 import { useAuth } from "./context/AuthContext";
 import { Layout, theme } from "antd";
@@ -59,7 +59,7 @@ export default function App() {
 
                 <Route element={<ProtectedLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/accounts" element={<Accounts />} />
+                    <Route path="/account" element={<Account />} />
                     <Route path="/market" element={<Market />} />
                     <Route path="/trades" element={<Trades />} />
                 </Route>

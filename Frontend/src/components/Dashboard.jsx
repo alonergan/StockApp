@@ -1,194 +1,444 @@
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Typography, Button } from "antd";
-import React, { useEffect, useState } from "react";
-import { AgCharts } from "ag-charts-react";
+import { Card, Col, Row, Table, Spin, Statistic, message } from "antd";
+import { Pie, Line} from "@ant-design/charts"; 
+import { useEffect, useState, useMemo} from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
-import '../Table.css';
-
-import {
-    AllCommunityModule, ModuleRegistry, LegendModule, CategoryAxisModule,
-    LineSeriesModule, NumberAxisModule
-} from "ag-charts-community";
-
-ModuleRegistry.registerModules([AllCommunityModule, CategoryAxisModule, LegendModule, LineSeriesModule, NumberAxisModule]);
-const { Title, Text } = Typography;
-
-//Line Chart for Current Ammount investing, currently only static data
-const LineChart = () => {
-    const [options, setOptions] = useState({
-        data: [
-            { month: "Jan", deposit: 0, Total: 10000 },
-            { month: "Feb", deposit: 63, Total: 10600 },
-            { month: "Mar", deposit: 200, Total: 10830 },
-            { month: "Apr", deposit: 100, Total: 10200 },
-            { month: "Jun", deposit: 150, Total: 10500 },
-            { month: "Jul", deposit: 150, Total: 11540 },
-            { month: "Aug", deposit: 300, Total: 13540 },
-            { month: "Sep", deposit: 1000, Total: 9500 },
-            { month: "Oct", deposit: 500, Total: 9500 },
-            { month: "Nov", deposit: 150, Total: 10200 },
-            { month: "Dec", deposit: 200, Total: 11500 },
-        ],
-        series: [{ type: "line", xKey: "month", yKey: "Total" }],
-    });
-    return <AgCharts options={options} />;
-};
+import { getMyAccount, getStandings } from "../api/accounts";
+import { getTrades } from "../api/trades"
 
 export default function Dashboard() {
-    const [holdingData, setHoldingData] = useState([])
+    // Setters
+    const { me } = useAuth();
+    const [holdingData, setHoldingData] = useState([]);
     const [tickers, setTickers] = useState([]);
     const [prices, setPrices] = useState([]);
+    const [standings, setStandings] = useState([]);
+    const [account, setAccount] = useState(null);
+    const [trades, setTrades] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    //The following will be for collecting our live data from our API
     useEffect(() => {
         async function load() {
-            const data = await getCurrentHoldings();
-            setHoldingData(data);
+            setLoading(true);
 
-            const prices = [];
+            try {
+                // Get holdings from django
+                const data = await getCurrentHoldings();
+                const standings = await getStandings();
+                const account = await getMyAccount();
+                const trades = await getTrades();
 
-            for (let i = 0; i < data.length; i++)
-            {
-                tickers[i]= (data[i].ticker);
-                const value = await getLatestStockPrice(data[i].ticker);
-                const price = value.c;
-                prices[i] = price;
+                // Saving holding data and account
+                setHoldingData(data);
+                setAccount(account);
+                setTrades(trades);
 
-            } 
-            setPrices(prices);
-            setTickers(tickers);
+                // Mapping array for x and y axis then sorting and setting
+                const newLine = standings
+                    .map((item) => ({
+                        date: new Date(item.timeStamp),
+                        balance: Number(item.balance),
+                    }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                setStandings(newLine);
+
+                // Temp holder for prices
+                const newPrices = [];
+
+                // Loop through each holding
+                for (let i = 0; i < data.length; i++) {
+                    // Save ticker symbol
+                    tickers.push(data[i].ticker);
+
+                    // Fetch latest price for that ticker
+                    const price = await getLatestStockPrice(data[i].ticker);
+
+                    //Save ticker price
+                    newPrices.push(price.c);
+                }
+
+                // Sets price and tickers
+                setPrices(newPrices);
+                setTickers(tickers);
+            } catch (e) {
+                message.error("Failed to load account");
+                console.log(e);
+            } finally {
+                setLoading(false);
+            }
         }
+
         load();
-    }, []);
 
-    const headers = [
-        {
-        id: 1,
-        KEY: "TICKER",
-        LABEL: "Ticker",
-        },
-        {
-        id: 2,
-        KEY: "QUANTITY",
-        LABEL: "Quantity",
-        },
-        {id: 3,
-        KEY: "CURRENT_PRICE",
-        LABEL: "Current Price",
-        },
-        {id: 4,
-        KEY: "TOTAL_VALUE",
-        LABEL: "Total Value",
-        },
+    }, [tickers]);
 
+    // Memo to set the color of the gain/loss and risk statistics
+    const { gainPct, gainColor, gainPrefix, riskColor } = useMemo(() => {
+        if (!account) {
+            return {
+                gainPct: 0,
+                gainColor: undefined,
+                gainPrefix: "",
+                riskColor: undefined
+            };
+        }
+
+        const start = Number(account.startBalance);
+        const current = Number(standings.at(-1)?.balance);
+        const pct = start > 0 ? ((current - start) / start) * 100 : 0;
+
+        const isGain = pct >= 0;
+        const gainColorLocal = isGain ? "#52c41a" : "#ff4d4f"; // green / red
+        const gainPrefixLocal = isGain ? "+" : "-";
+
+        const risk = Number(account.riskLevel);
+        const riskColorLocal =
+            risk === 1 ? "#52c41a" : risk === 2 ? "#faad14" : "#ff4d4f"; // green/yellow/red
+
+        return {
+            gainPct: Math.abs(pct),
+            gainColor: gainColorLocal,
+            gainPrefix: gainPrefixLocal,
+            riskColor: riskColorLocal,
+        };
+    }, [account]);
+
+    // Mapping of trade table rows to format the data
+    const tradeTableRows = (trades ?? []).map((trade, i) => {
+        const price = trade?.price != null ? Number(trade.price) : null;
+        const quantity = trade?.quantity != null ? Number(trade.quantity) : null;
+        const wholeTimeStamp = trade?.timeStamp != null ? new Date(trade.timeStamp) : null;
+        const timeStamp = `${wholeTimeStamp?.getMonth()}/${wholeTimeStamp?.getDate()}/${wholeTimeStamp?.getFullYear()} - ${wholeTimeStamp?.getHours()}:${wholeTimeStamp?.getSeconds()}`
+
+        return {
+            key: trade?.id ?? `${trade?.ticker ?? "t"}-${trade?.timeStamp ?? "ts"}-${i}`,
+            timeStamp: timeStamp,
+            method: trade?.method ?? null,
+            ticker: trade?.ticker ?? null,
+            price,
+            quantity,
+            totalValue: price != null && quantity != null ? price * quantity : null,
+        };
+    });
+
+    // Trade table column style
+    const tradeTableColumns = [{
+        title: "TimeStamp",
+        dataIndex: "timeStamp",
+        key: "timeStamp",
+        defaultSortOrder: "descend",
+        sorter: (a, b) => new Date(a.timeStamp) - new Date(b.timeStamp),
+    },
+    {
+        title: "Method",
+        dataIndex: "method",
+        key: "method",
+        align: "right",
+        sorter: (a, b) => (a.method ?? "").localeCompare(b.method ?? ""),
+        render: (method) => renderTradeMethod(method)
+    },
+    {
+        title: "Ticker",
+        dataIndex: "ticker",
+        key: "ticker",
+        align: "right",
+        sorter: (a, b) => a.ticker.localeCompare(b.ticker),
+    },
+    {
+        title: "Price",
+        dataIndex: "price",
+        key: "price",
+        align: "right",
+        render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        sorter: (a, b) => a.price - b.price,
+    },
+    {
+        title: "Quantity",
+        dataIndex: "quantity",
+        key: "quantity",
+        align: "right",
+        render: (num) => (num == null ? "--" : num.toFixed(2)),
+        sorter: (a, b) => a.quantity - b.quantity,
+    },
+    {
+        title: "Total Value",
+        dataIndex: "totalValue",
+        key: "totalValue",
+        align: "right",
+        render: (num) => (num == null ? "--" : `$${num.toFixed(2)}`),
+        sorter: (a, b) => a.totalValue - b.totalValue,
+    },
     ];
 
-    const data = [
-        {
-            ID: 1,
-            TICKER: tickers[0],
-            QUANTITY: holdingData[0]?.quantity? Number(holdingData[0].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[0] != null? `$${prices[0].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[0] != null && holdingData[0]?.quantity != null? `$${(holdingData[0].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 2,
-            TICKER: tickers[1],
-            QUANTITY: holdingData[1]?.quantity? Number(holdingData[1].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[1] != null? `$${prices[1].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[1] != null && holdingData[1]?.quantity != null? `$${(holdingData[1].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 3,
-            TICKER: tickers[2],
-            QUANTITY: holdingData[2]?.quantity? Number(holdingData[2].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[2] != null? `$${prices[2].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[2] != null && holdingData[2]?.quantity != null? `$${(holdingData[2].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-             {
-            ID: 3,
-            TICKER: tickers[3],
-            QUANTITY: holdingData[3]?.quantity? Number(holdingData[3].quantity).toFixed(0): null,
-            CURRENT_PRICE: prices[3] != null? `$${prices[3].toFixed(2)}`: "ERR",
-            TOTAL_VALUE: prices[3] != null && holdingData[3]?.quantity != null? `$${(holdingData[3].quantity * prices[1]).toFixed(2)}`: "ERR"
-        },
-    ]
-            
-    return (
-        <Row gutter={[16, 16]}>
-            <Col lg={16}>
-                <Card style={{ width: "100%" }} title="Investing">
-                    <div style={{ height: 320 }}>
-                        <LineChart />
-                    </div>
-                </Card>
-            </Col>
-                 <Col lg={8}>
-                <Card style={{ width: "100%" }} title="Current Holdings">
-                <table style={{ height: 320 }}>
-                    <thead>
-                        <tr>
-                            {headers.map((header, index) => (
-                                <th key={index}>
-                                    <span>{header.LABEL}</span>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                     {data.map((row, index) => (
-                        <tr key={index}>
-                            {headers.map((header, index) => {
-                                return (
-                                <td key={index}>
-                                    {row[header.KEY]}
-                                </td>
-                                )
-                            })}
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[0]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[0]?.quantity)}</p>
-                        <p>Current Price: ${prices[0] ? prices[0].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[0] ? (holdingData[0]?.quantity * prices[0]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[1]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[1]?.quantity)}</p>
-                        <p>Current Price: ${prices[1] ? prices[1].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[1] ? (30 * prices[1]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[2]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[2]?.quantity)}</p>
-                        <p>Current Price: ${prices[2] ? prices[2].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[2] ? (50 * prices[2]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>
-            <Col lg={8}>
-                <Card style={{ width: "100%" }} title={tickers[3]}>
-                    <div style={{ height: 120 }}>
-                        <p>Quantity: {Number(holdingData[2]?.quantity)}</p>
-                        <p>Current Price: ${prices[3] ? prices[3].toFixed(2) : "ERR"}</p>
-                        <p>Total Value: ${prices[3] ? (50 * prices[3]).toFixed(2) : "ERR"}</p>
-                    </div>
-                </Card>
-            </Col>            
-        </Row>
+    const renderTradeMethod = (method) => {
+        if (method == null) return "--";
+        const color = method == "BUY" ? "green" : method == "SELL" ? "red" : "inherit";
+        return (
+            <span style={{ color }} > {method} </span>
+        );
+    };
 
+    // Build pie data
+    const pieChartData = useMemo(() => {
+        return holdingData.map((item, index) => {
+            // Get price 
+            const price = Number(prices[index]);
+
+            //Checking for availability of price
+            if (price === undefined || price === null) return null;
+
+            // Ensure quantity is a number 
+            const quantity = Number(item.quantity) || 0;
+
+            //Setting value to two decimal places
+            const totValue = Math.round(price * quantity * 100) / 100;
+            const convertedPrice = Number(price);
+
+            // Return formatted object for chart
+            return {
+                type: item.ticker,
+                price: convertedPrice,
+                value: totValue,
+                quantity: quantity
+            };
+        }).filter(Boolean); // remove null entries
+    }, [holdingData, prices]);
+
+    // is my pieData available
+    const pieDataAvailable = pieChartData.length > 0;
+
+    // Convert pi chart data to use percentages
+    const total = pieChartData.reduce((sum, d) => sum + d.value, 0);
+    const dataWithPercent = pieChartData.map(d => ({
+                ...d,
+                percent: d.value / total,
+    }));
+
+    // Pie Chart logic and configurations
+    const pieChartConfig = useMemo(() => ({
+            data: dataWithPercent,
+            //Slices shows price * quantity of ticker
+            angleField: "value",
+            colorField: "type",
+            radius: 1,
+            innerRadius: 0.6,
+            theme: "dark",
+            //Shows ticker prices inside pie chart slices
+            label: {
+                text: (dataWithPercent) => {
+
+                // Dont show labels for small slices
+                if (dataWithPercent.percent < 0.05) {
+                    return "";
+                }
+
+                return `${dataWithPercent.type}\n${(dataWithPercent.percent * 100).toFixed(1)}%`;
+            },
+            style: {
+                fill: "#fff",
+            }
+        },
+
+            legend: {
+                position: "bottom",
+            itemName: {
+                formatter: (text) => {
+                    // get data for tickers
+                    const found = pieChartData.find(dataWithPercent => dataWithPercent.type === text);
+                    // If no price, set to 0
+                    const price = found?.price || 0;
+                    // Setting price to two decimal places
+                    return `${text} ($${price.toFixed(2)})`;
+                },
+            style: {
+                fill: "#fff",
+                },
+            },
+        },
+
+            tooltip: {
+                items: [
+                (d) => ({
+                        name: d.type,
+                        value: `Quantity: ${d.quantity} <br/> Current Price: $${(d.price).toFixed(2)} <br/> Total Value: $${(d.value).toFixed(2)}  <br/> Percentage of Holdings: ${(d.percent * 100).toFixed(2)}%`,
+                }),
+            ],
+        },
+    }), [pieChartData]);
+
+    // Configuring Line graph
+    const lineChartConfig = useMemo(() => ({
+                data: standings,
+            xField: "date",
+            yField: "balance",
+            smooth: true,
+            theme: "dark",
+            autoFit: true,
+            height: 480,
+            point: {
+                size: 4,
+            shape: "circle",
+        },
+    }), [standings]);
+
+    // Configuring table Data
+    const tableData = useMemo(() => {
+        return holdingData.map((item, index) => {
+            const price = Number(prices[index]) || 0;
+            const quantity = Number(item.quantity) || 0;
+
+            return {
+                key: item.ticker,
+            type: item.ticker,
+            quantity,
+            price,
+            value: Math.round(price * quantity * 100) / 100,
+            };
+        });
+    }, [holdingData, prices]);
+
+    // Table Column Formatting
+    const tableColumns = useMemo(() => [{
+                title: "Ticker",
+            dataIndex: "type",
+            key: "ticker",
+            defaultSortOrder: "ascend",
+            align: "left",
+            sorter: (a, b) => a.type.localeCompare(b.type),
+        },
+            {
+                title: "Shares",
+            dataIndex: "quantity",
+            align: "right",
+            sorter: (a, b) => (a.quantity ?? 0) - (b.quantity ?? 0),
+        },
+            {
+                title: "Price",
+            dataIndex: "price",
+            align: "right",
+            render: (val) => `$${(val || 0).toFixed(2)}`,
+            sorter: (a, b) => (a.price ?? 0) - (b.price ?? 0),
+        },
+            {
+                title: "Value",
+            dataIndex: "value",
+            align: "right",
+            render: (val) => `$${(val || 0).toLocaleString()}`,
+            sorter: (a, b) => (a.value ?? 0) - (b.value ?? 0),
+        },
+    ], []);
+
+    return (
+        <>
+            <Spin spinning={loading}>
+                <Row gutter={[16, 16]}>
+                    {/* Row 1: Summary cards */}
+                    <Col span={8}>
+                        <Card style={{ width: "100%" }} title="Principle">
+                            <Statistic
+                                value={account?.startBalance}
+                                precision={2}
+                                prefix="$"
+                            />
+                        </Card>
+                    </Col>
+                    <Col span={7}>
+                        <Card style={{ width: "100%" }} title="Current Balance">
+                            <Statistic
+                                value={standings.at(-1)?.balance}
+                                precision={2}
+                                prefix="$"
+                            />
+                        </Card>
+                    </Col>
+                    <Col span={3}>
+                        <Card style={{ width: "100%" }} title="Gain/Loss">
+                            <Statistic
+                                value={gainPct}
+                                precision={2}
+                                suffix="%"
+                                valueStyle={{ color: gainColor }}
+                                prefix={gainPrefix}
+                            />
+                        </Card>
+                    </Col>
+                    <Col span={3}>
+                        <Card style={{ width: "100%" }} title="Withdrawal Threshold">
+                            <Statistic
+                                value={account?.thresholdPercentage}
+                                precision={2}
+                                suffix="%"
+                            />
+                        </Card>
+                    </Col>
+                    <Col span={3}>
+                        <Card style={{ width: "100%" }} title="Risk Level">
+                            <Statistic
+                                value={Number(account?.riskLevel)}
+                                valueStyle={{ color: riskColor }}
+                            />
+                        </Card>
+                    </Col>
+                    {/* Row 2 */}
+                    <Col span={15}>
+                        <Card
+                            title="Account Standings"
+                            style={{ background: "#141414", color: "#fff" }}
+                        >
+                            <div style={{ width: "100%", height: 480 }}>
+                                <Line {...lineChartConfig} />
+                            </div>
+                        </Card>
+                    </Col>
+                    <Col span={9}>
+                        <Card
+                            style={{
+                                width: "100%",
+                                background: "#141414",
+                                color: "#fff",
+                            }}
+                            title="Holdings Diversity"
+                        >
+                            {pieDataAvailable ? (
+                                <Pie {...pieChartConfig} />
+                            ) : (
+                                <p style={{ color: "#fff" }}>Loading chart...</p>
+                            )}
+                        </Card>
+                    </Col>
+                    {/* Row 3 */}
+                    <Col span={12}>
+                        <Card
+                            style={{ width: "100%", height: "100%" }}
+                            title="Account Holdings"
+                        >
+                            <Table
+                                dataSource={tableData}
+                                columns={tableColumns}
+                                size="large"
+                                pagination={{
+                                    pageSize: 10,
+                                    position: ["bottomCenter"],
+                                }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col span={12}>
+                        <Card style={{ width: "100%" }} title="Recent Trades">
+                            <Table
+                                columns={tradeTableColumns}
+                                dataSource={tradeTableRows}
+                                size="large"
+                                pagination={{
+                                    pageSize: 10,
+                                    position: ["bottomCenter"],
+                                }}
+                            />
+                        </Card>
+                    </Col>
+                </Row>
+            </Spin>
+        </>
     );
 }
