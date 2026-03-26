@@ -1,12 +1,12 @@
 import { useAuth } from "../context/AuthContext";
-import { Card, Col, Row, Table, Spin, Statistic, message } from "antd";
-import { Pie, Line} from "@ant-design/charts"; 
-import { useEffect, useState, useMemo} from "react";
+import { Card, Col, Row, Table, Spin, Statistic, message, Button } from "antd";
+import { Pie, Line } from "@ant-design/charts";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { getCurrentHoldings } from '../api/holdings';
 import { getLatestStockPrice } from "../api/finnhub/stocks";
 import { getMyAccount, getStandings } from "../api/accounts";
 import { getTrades } from "../api/trades"
-
+import StockInfoModal from "../components/StockInfoModal";
 export default function Dashboard() {
     // Setters
     const { me } = useAuth();
@@ -17,6 +17,8 @@ export default function Dashboard() {
     const [account, setAccount] = useState(null);
     const [trades, setTrades] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [stockInfoModalOpen, setStockInfoModalOpen] = useState(false);
+    const [selectedTicker, setSelectedTicker] = useState(null);
 
     useEffect(() => {
         async function load() {
@@ -298,13 +300,32 @@ export default function Dashboard() {
         });
     }, [holdingData, prices]);
 
+    const openStockInfo = useCallback((ticker) => {
+        setSelectedTicker(ticker);
+        setStockInfoModalOpen(true);
+    }, []);
+
+    const closeStockInfo = useCallback(() => {
+        setStockInfoModalOpen(false);
+    }, []);
+
+    const renderTickerColumn = useCallback(
+        (ticker) => (
+            <Button type="text" color="primary" onClick={() => openStockInfo(ticker)}>
+                {ticker}
+            </Button>
+        ),
+        [openStockInfo]
+    );
+
     // Table Column Formatting
     const tableColumns = useMemo(() => [{
-                title: "Ticker",
+            title: "Ticker",
             dataIndex: "type",
             key: "ticker",
             defaultSortOrder: "ascend",
             align: "left",
+            render: (ticker) => renderTickerColumn(ticker),
             sorter: (a, b) => a.type.localeCompare(b.type),
         },
             {
@@ -419,7 +440,7 @@ export default function Dashboard() {
                                 size="large"
                                 pagination={{
                                     pageSize: 10,
-                                    position: ["bottomCenter"],
+                                    placement: ["bottomCenter"],
                                 }}
                             />
                         </Card>
@@ -432,13 +453,19 @@ export default function Dashboard() {
                                 size="large"
                                 pagination={{
                                     pageSize: 10,
-                                    position: ["bottomCenter"],
+                                    placement: ["bottomCenter"],
                                 }}
                             />
                         </Card>
                     </Col>
                 </Row>
             </Spin>
+            { /* Stock Info Graph Popup */ }
+            <StockInfoModal
+                open={stockInfoModalOpen}
+                ticker={selectedTicker}
+                onClose={closeStockInfo}
+            />
         </>
     );
 }
