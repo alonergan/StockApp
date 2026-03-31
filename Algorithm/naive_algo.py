@@ -3,12 +3,12 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv1D, LSTM, Dense, Dropout
+from tensorflow.keras.layers import Conv1D, LSTM, Dense, Dropout, Input
 from tensorflow.keras.callbacks import EarlyStopping
 import pandas as pd
+import json # for exporting signals and returns to json for backtesting
 
 # MAIN
-import pandas as pd
 
 TRAIN_START  = "2019-07-01"
 TRAIN_END    = "2021-12-31"   # last training day before test window
@@ -31,16 +31,12 @@ def smooth_data(df: pd.DataFrame) -> pd.DataFrame:
     # smooth the data using a rolling window of 5 days
     raw_close = df.pivot(columns="ticker", values="close",index="timestamp")
     smoothed  = raw_close.rolling(window=5, min_periods=1).mean()
-
-    
-    
     return smoothed
 
 def build_model(window: int) -> Sequential:
-    # CNN-LSTM architecture from the paper.
     model = Sequential([
-        Conv1D(filters=5, kernel_size=3, activation="relu",
-               padding="same", input_shape=(window, 1)),
+        Input(shape=(window, 1)),
+        Conv1D(filters=5, kernel_size=3, activation="relu", padding="same"),
         Dropout(0.2),
         LSTM(128, return_sequences=True),
         Dropout(0.2),
@@ -87,7 +83,19 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
         return (open_t - close_t) / open_t
     return 0.0
 
-
+def export_signals_and_returns_to_json(signal, trade_ret, date, ticker):
+    # create a dictionary to hold the data
+    data = {
+        "date": date,
+        "ticker": ticker,
+        "signal": signal,
+        "trade_return": trade_ret
+    }
+    
+    # export to json
+    with open('signals_and_returns.json', 'a') as f:
+        json.dump(data, f)
+        f.write('\n')  # write a newline for each record
 
 
 TRAIN_START  = "2019-07-01"
@@ -104,7 +112,7 @@ df = pd.read_csv("aa_daily_data.csv")
 # for testing, only use 5 stocks
 # df = df[df['ticker'].isin(['ACHC', 'AEE', 'HCKT', 'HALO', 'MA'])]
 
-# for testing, only use 1 stocks
+# for testing, only use some stock(s)
 df = df[df['ticker'].isin(['UE','HALO'])]
 
 df = convert_and_cut_date(df, TRAIN_START, TEST_END)
@@ -142,7 +150,7 @@ for ticker in df['ticker'].unique():
 
         # make the train data only the current ticker
         train_data = train_data[ticker]
-        
+
         if len(train_data) < WINDOW_SIZE:
             print("Not enough training data, skipping this date.")
             print(train_data)
@@ -176,5 +184,7 @@ for ticker in df['ticker'].unique():
 
         signal      = trading_signal(prev_close, actual_open, pred_price)
         trade_ret   = compute_trade_return(signal, actual_open, actual_close)
+
+        export_signals_and_returns_to_json(signal, trade_ret, test_date, ticker)
 
         print(f"Predicted: {pred_price:.2f}, Previous Close: {prev_close:.2f}, Actual Open: {actual_open:.2f}, Actual Close: {actual_close:.2f}, Signal: {signal}, Return: {trade_ret:.4f}\n")
