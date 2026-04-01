@@ -105,7 +105,7 @@ df = pd.read_csv("aa_daily_data.csv")
 # df = df[df['ticker'].isin(['ACHC', 'AEE', 'HCKT', 'HALO', 'MA'])]
 
 # for testing, only use some stock(s)
-df = df[df['ticker'].isin(['UE','HALO'])]
+# df = df[df['ticker'].isin(['UE','HALO'])]
 
 df = convert_and_cut_date(df, TRAIN_START, TEST_END)
 
@@ -120,7 +120,7 @@ early_stop = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True
 # ticker = "UE"
 
 # FOR TESTING, doing less days
-TEST_END = "2022-01-07"
+# TEST_END = "2022-01-07"
 
 
 # testing, seeing if we are using a GPU?
