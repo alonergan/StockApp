@@ -1,0 +1,5 @@
+time took to train 2 stocks with a window size of 30 for 4 days: 23.379
+
+time took to train 2 stocks with a window size of 30 for 90 days: 240.989 : 4 minutes. 2 minutes per.
+
+2 * 216 = 432 432/60 = 7.2 hours.

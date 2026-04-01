@@ -7,6 +7,7 @@ from tensorflow.keras.layers import Conv1D, LSTM, Dense, Dropout, Input
 from tensorflow.keras.callbacks import EarlyStopping
 import pandas as pd
 import json # for exporting signals and returns to json for backtesting
+import time # to see how long it takes to run the model.
 
 # MAIN
 
@@ -83,20 +84,11 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
         return (open_t - close_t) / open_t
     return 0.0
 
-def export_signals_and_returns_to_json(signal, trade_ret, date, ticker):
-    # create a dictionary to hold the data
-    data = {
-        "date": date,
-        "ticker": ticker,
-        "signal": signal,
-        "trade_return": trade_ret
-    }
-    
+def export_signals_and_returns_to_csv(information):
     # export to json
-    with open('signals_and_returns.json', 'a') as f:
-        json.dump(data, f)
-        f.write('\n')  # write a newline for each record
-
+    with open('signals_and_returns.csv', 'a') as f:
+        for item in information:
+            f.write(','.join(map(str, item)) + '\n')
 
 TRAIN_START  = "2019-07-01"
 TRAIN_END    = "2021-12-31"   # last training day before test window
@@ -123,7 +115,6 @@ raw_open = df.pivot(columns='ticker',index='timestamp')['open']
 raw_close = df.pivot(columns='ticker',index='timestamp')['close']
 
 
-scaler = MinMaxScaler()
 early_stop = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True)
 
 # ticker = "UE"
@@ -131,9 +122,17 @@ early_stop = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True
 # FOR TESTING, doing less days
 TEST_END = "2022-01-07"
 
+
+# testing, seeing if we are using a GPU?
+print("TF config:",tf.config.list_physical_devices('GPU'))
+
+start_time = time.time()
+
 # cool, now we have to move the window and retrain the model for each test day in the test window, 
 # then compute signals and returns for each day.
 for ticker in df['ticker'].unique():
+    ticker_signals_and_returns = []
+    # start a timer to see how long it takes to train the models
     print(f"Testing for {ticker}...\n")
     for i, test_date in enumerate(pd.date_range(TEST_START, TEST_END)):
         # if there is a gap, error out
@@ -157,6 +156,7 @@ for ticker in df['ticker'].unique():
             continue
         
         # Scale
+        scaler = MinMaxScaler()
         scaled = scaler.fit_transform(train_data.values.reshape(-1, 1)).flatten()
 
         # Build sequences
@@ -185,6 +185,14 @@ for ticker in df['ticker'].unique():
         signal      = trading_signal(prev_close, actual_open, pred_price)
         trade_ret   = compute_trade_return(signal, actual_open, actual_close)
 
-        export_signals_and_returns_to_json(signal, trade_ret, test_date, ticker)
+        # export_signals_and_returns_to_json(signal, trade_ret, test_date, ticker)
+
+        ticker_signals_and_returns.append((test_date, ticker, signal, trade_ret))
+
 
         print(f"Predicted: {pred_price:.2f}, Previous Close: {prev_close:.2f}, Actual Open: {actual_open:.2f}, Actual Close: {actual_close:.2f}, Signal: {signal}, Return: {trade_ret:.4f}\n")
+
+
+    export_signals_and_returns_to_csv(ticker_signals_and_returns)
+
+print("program took", time.time() - start_time, "to run")
