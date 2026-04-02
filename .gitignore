@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+Algorithm/quarterly_reports/
+Algorithm/combined_data.csv
+Algorithm/api_key.txt
+Algorithm/aa_daily_data.csv
