@@ -89,6 +89,13 @@ def trading_signal(prev_close: float, open_t: float, predicted: float) -> str:
         return "SELL"
     return "HOLD"
 
+def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
+    if signal == "BUY":
+        return (close_t - open_t) / open_t
+    elif signal == "SELL":
+        return (open_t - close_t) / open_t
+    return 0.0
+
 def export_signals_and_returns_to_csv(information):
     # export to json
     with open('signals_and_returns.csv', 'a') as f:
@@ -197,6 +204,7 @@ for cluster in clusters_df['Cluster'].unique():
             prev_close   = raw_close.iloc[raw_close.index.get_loc(test_date) - 1][ticker]
 
             signal    = trading_signal(prev_close, actual_open, pred_price)
+            return_t  = compute_trade_return(signal, actual_open, actual_close)
 
             ticker_signals_and_returns.append((test_date, ticker, signal))
 
