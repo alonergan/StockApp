@@ -107,11 +107,8 @@ BATCH_SIZE   = 32
 df = pd.read_csv("aa_daily_data.csv")
 
 # for testing, only use some stocks
-substocks = ['ACHC', 'AEE', 'HCKT', 'HALO', 'MA','TPC','EARN']
-df = df[df['ticker'].isin(substocks)]
-
-# for testing, only use some stock(s)
-# df = df[df['ticker'].isin(['UE','HALO'])]
+# substocks = ['ACHC', 'AEE', 'HCKT', 'HALO', 'MA','TPC','EARN']
+# df = df[df['ticker'].isin(substocks)]
 
 df = convert_and_cut_date(df, TRAIN_START, TEST_END)
 
@@ -126,12 +123,12 @@ early_stop = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True
 # ticker = "UE"
 
 # FOR TESTING, doing less days
-TEST_END = "2022-01-07"
+# TEST_END = "2022-01-07"
 
 
 clusters_df = pd.read_csv("q1_2022_stock_clusters.csv")
 
-clusters_df = clusters_df[clusters_df['Ticker'].isin(substocks)]
+# clusters_df = clusters_df[clusters_df['Ticker'].isin(substocks)]
 
 print(clusters_df)
 
