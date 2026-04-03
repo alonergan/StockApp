@@ -4,4 +4,4 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir scikit-learn pandas
 
-CMD ["python", "quarterly_clusters_model\clustering_algo.py"]
+CMD ["python", "clustering_algo.py"]
