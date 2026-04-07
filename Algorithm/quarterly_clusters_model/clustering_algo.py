@@ -20,8 +20,8 @@ TRAIN_END    = "2021-12-31"   # last training day before test window
 TEST_START   = "2022-04-01"
 TEST_END     = "2022-06-30"
  
-WINDOW_SIZE  = 90             # number of past days used as input
-EPOCHS       = 40
+WINDOW_SIZE  = 180             # number of past days used as input
+EPOCHS       = 80
 BATCH_SIZE   = 32
 
 
@@ -100,7 +100,7 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
 
 def export_signals_and_returns_to_csv(information):
     # export to json
-    with open('q2_2022_clustered_signals_and_returns.csv', 'a') as f:
+    with open('q2_2022_worst_stocks_clustered_signals_and_returns.csv', 'a') as f:
         for item in information:
             f.write(','.join(map(str, item)) + '\n')
 
@@ -126,79 +126,90 @@ early_stop = EarlyStopping(monitor='loss', patience=8, restore_best_weights=True
 
 clusters_df = pd.read_csv("stock_clusters_precompute_q1_2022.csv")
 
-print(clusters_df)
-
 # testing, seeing if we are using a GPU?
 print("TF config:",tf.config.list_physical_devices('GPU'))
 
 start_time = time.time()
 
+# looking at only the worst performing  stocks for now.
+clustering_signals_and_returns = pd.read_csv('q2_2022_clustered_signals_and_returns.csv', header=None)
+clustering_signals_and_returns.columns = ['timestamp', 'ticker', 'signal', 'return']
+clustering_signals_and_returns['timestamp'] = pd.to_datetime(clustering_signals_and_returns['timestamp'])
+
+cluster_stock_returns = clustering_signals_and_returns.groupby('ticker')['return'].sum().sort_values()
+
+worst_stocks = cluster_stock_returns.sort_values().head(30).index.tolist()
+print("Worst performing stocks in cluster model:", worst_stocks)
+
 # cool, now we have to move the window and retrain the model for each test day in the test window, 
 # then compute signals and returns for each day.
+ticker_signals_and_returns = []
 for cluster in clusters_df['Cluster'].unique():
     cluster_tickers = clusters_df[clusters_df['Cluster'] == cluster]['Ticker'].tolist()
     print(f"Testing for cluster {cluster} with tickers: {cluster_tickers}...\n")
 
     for ticker in cluster_tickers:
         ticker_signals_and_returns = []
-        print(f"Testing for {ticker}...\n")
+        # only running on the worst stocks
+        if ticker in worst_stocks:
+            print(f"Testing for {ticker}...\n")
 
-        for i, test_date in enumerate(pd.date_range(TEST_START, TEST_END)):
-            if test_date not in raw_close.index:
-                continue
-            
-            test_date = test_date.strftime("%Y-%m-%d")
+            for i, test_date in enumerate(pd.date_range(TEST_START, TEST_END)):
+                if test_date not in raw_close.index:
+                    continue
+                
+                test_date = test_date.strftime("%Y-%m-%d")
 
-            train_data = df_smoothed[df_smoothed.index < test_date]
-            train_data = train_data[train_data.index <= (pd.to_datetime(test_date) - pd.Timedelta(days=WINDOW_SIZE))]
-            train_data = train_data[cluster_tickers]
+                train_data = df_smoothed[df_smoothed.index < test_date]
+                train_data = train_data[train_data.index <= (pd.to_datetime(test_date) - pd.Timedelta(days=WINDOW_SIZE))]
+                train_data = train_data[cluster_tickers]
 
-            if len(train_data) < WINDOW_SIZE:
-                continue
+                if len(train_data) < WINDOW_SIZE:
+                    continue
 
-            # Scale each stock independently
-            scalers = {}
-            scaled_cols = []
-            for cluster_ticker in cluster_tickers:
-                s = MinMaxScaler()
-                scaled = s.fit_transform(train_data[cluster_ticker].values.reshape(-1, 1)).flatten()
-                scalers[cluster_ticker] = s
-                scaled_cols.append(scaled)
+                # Scale each stock independently
+                scalers = {}
+                scaled_cols = []
+                for cluster_ticker in cluster_tickers:
+                    s = MinMaxScaler()
+                    scaled = s.fit_transform(train_data[cluster_ticker].values.reshape(-1, 1)).flatten()
+                    scalers[cluster_ticker] = s
+                    scaled_cols.append(scaled)
 
-            # (n_days, n_stocks)
-            scaled_matrix = np.column_stack(scaled_cols)
+                # (n_days, n_stocks)
+                scaled_matrix = np.column_stack(scaled_cols)
 
-            # target index is the position of the current ticker in the cluster
-            target_idx = cluster_tickers.index(ticker)
-            X, y = build_sequences_multivariate(scaled_matrix, target_idx, WINDOW_SIZE)
+                # target index is the position of the current ticker in the cluster
+                target_idx = cluster_tickers.index(ticker)
+                X, y = build_sequences_multivariate(scaled_matrix, target_idx, WINDOW_SIZE)
 
-            tf.keras.backend.clear_session()
-            model = build_model(WINDOW_SIZE, n_stocks=len(cluster_tickers))
-            model.fit(X, y,
-                      epochs=EPOCHS,
-                      batch_size=BATCH_SIZE,
-                      callbacks=[early_stop],
-                      verbose=0)
+                tf.keras.backend.clear_session()
+                model = build_model(WINDOW_SIZE, n_stocks=len(cluster_tickers))
+                model.fit(X, y,
+                        epochs=EPOCHS,
+                        batch_size=BATCH_SIZE,
+                        callbacks=[early_stop],
+                        verbose=0)
 
-            # Predict
-            last_window = scaled_matrix[-WINDOW_SIZE:].reshape(1, WINDOW_SIZE, len(cluster_tickers))
-            pred_scaled = model.predict(last_window, verbose=0)[0, 0]
-            pred_price  = scalers[ticker].inverse_transform([[pred_scaled]])[0, 0]
+                # Predict
+                last_window = scaled_matrix[-WINDOW_SIZE:].reshape(1, WINDOW_SIZE, len(cluster_tickers))
+                pred_scaled = model.predict(last_window, verbose=0)[0, 0]
+                pred_price  = scalers[ticker].inverse_transform([[pred_scaled]])[0, 0]
 
-            actual_close = raw_close.loc[test_date, ticker]
-            actual_open  = raw_open.loc[test_date, ticker]
-            prev_close   = raw_close.iloc[raw_close.index.get_loc(test_date) - 1][ticker]
+                actual_close = raw_close.loc[test_date, ticker]
+                actual_open  = raw_open.loc[test_date, ticker]
+                prev_close   = raw_close.iloc[raw_close.index.get_loc(test_date) - 1][ticker]
 
-            signal    = trading_signal(prev_close, actual_open, pred_price)
-            return_t  = compute_trade_return(signal, actual_open, actual_close)
+                signal    = trading_signal(prev_close, actual_open, pred_price)
+                return_t  = compute_trade_return(signal, actual_open, actual_close)
 
-            ticker_signals_and_returns.append((test_date, ticker, signal, return_t))
+                ticker_signals_and_returns.append((test_date, ticker, signal, return_t))
 
-            print(f"Predicted: {pred_price:.2f}, Previous Close: {prev_close:.2f}, "
-                  f"Actual Open: {actual_open:.2f}, Actual Close: {actual_close:.2f}, "
-                  f"Signal: {signal}\n, "
-                  f"Return: {return_t:.4f}\n")
+                print(f"Predicted: {pred_price:.2f}, Previous Close: {prev_close:.2f}, "
+                    f"Actual Open: {actual_open:.2f}, Actual Close: {actual_close:.2f}, "
+                    f"Signal: {signal}\n, "
+                    f"Return: {return_t:.4f}\n")
 
-        export_signals_and_returns_to_csv(ticker_signals_and_returns)
+            export_signals_and_returns_to_csv(ticker_signals_and_returns)
 
 print("program took", time.time() - start_time, "to run")
