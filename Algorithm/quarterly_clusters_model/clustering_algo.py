@@ -95,15 +95,6 @@ def export_signals_and_returns_to_csv(information):
         for item in information:
             f.write(','.join(map(str, item)) + '\n')
 
-TRAIN_START  = "2019-07-01"
-TRAIN_END    = "2021-12-31"   # last training day before test window
-TEST_START   = "2022-01-03"
-TEST_END     = "2022-03-31"
- 
-WINDOW_SIZE  = 30             # number of past days used as input
-EPOCHS       = 20
-BATCH_SIZE   = 32
-
 df = pd.read_csv("aa_daily_data.csv")
 
 # for testing, only use some stocks
