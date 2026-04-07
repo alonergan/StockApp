@@ -14,29 +14,32 @@ from tslearn.clustering import silhouette_score
 
 ratios_df = pd.read_csv('all_stock_ratios.csv')
 
+ratios = ratios_df.columns[2:].to_list()
+
 # for testing, only use some stock(s)
 # ratios_df = ratios_df[ratios_df['Ticker'].isin(['UE','HALO', 'ACHC', 'AEE', 'HCKT', 'MA',''])]
 # ratios_df = ratios_df[ratios_df['Ticker'].isin(['UE','HALO', 'ACHC'])]
-
 # ratios_df = ratios_df[ratios_df['Ticker'].isin(ratios_df['Ticker'].unique()[:68])]
 
 # if there are stocks without all the dates, remove that stock
 ratios_df = ratios_df.groupby('Ticker').filter(lambda x: len(x) == 58)
 
+#reducing the number of colummns
+# first two are not ratios. 
+cols_to_remove = ['dividend_per_share','relative_price_evolution']
+ratios_df = ratios_df.drop(columns=cols_to_remove)
+
 # all columns except 'Ticker' and 'Date' should be numeric, so we convert them to numeric and coerce errors to NaN
+#try to fill with mean, then 0.
+ratios_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 for col in ratios_df.columns[2:]:
     ratios_df[col] = pd.to_numeric(ratios_df[col], errors='coerce')
-    ratios_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     mean_value = ratios_df[col].mean()
     ratios_df[col] = ratios_df[col].fillna(mean_value)
     # there could still be some nan if there is no values.
     ratios_df[col] = ratios_df[col].fillna(0)
 
 print(f"we have the {ratios_df['Ticker'].nunique()} stocks with 58 months of data.")
-
-# removing ratios that still need to be cleaned up.
-columns_to_remove = ['net_income_minus_taxes_over_net_income','income_to_equity','relative_price_evolution','dividend_per_share','inventory_over_current_liabilities']
-ratios_df = ratios_df.drop(columns=columns_to_remove)
 
 # remove the 'Date' column
 ratios_df = ratios_df.drop(columns=['fiscalDateEnding'])
@@ -51,31 +54,54 @@ X_numpy = [
 
 X_numpy = np.stack(X_numpy)
 
-# print(X_numpy)
-
 X_scaled_ts = TimeSeriesScalerMeanVariance().fit_transform(X_numpy)
 
-num_clusters = 21
+output_list = []
 
-# for num_clusters in range(2, 30):
-model = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", max_iter=100, random_state=42)
-labels = model.fit_predict(X_scaled_ts)
+# currently testing each ratio independently.
+# for ratio in ratios:
+#     for num_clusters in range(2, 31):
+#         model = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", max_iter=400, random_state=42)
+#         labels = model.fit_predict(X_scaled_ts[:,:,columns.index(ratio)])
+#         # model = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", max_iter=100, random_state=42)
 
-print(float(silhouette_score(X_scaled_ts, labels, metric="dtw")))
+#         output_list.append({
+#             'Ratio': ratio,
+#             'Num Clusters': num_clusters,
+#             'Silhouette Score': float(silhouette_score(X_scaled_ts[:,:,columns.index(ratio)], labels, metric="dtw"))
+#         })
 
-    # print(labels)
+#         print(f"Ratio: {ratio}, Num Clusters: {num_clusters}, Silhouette Score: {float(silhouette_score(X_scaled_ts[:,:,columns.index(ratio)], labels, metric='dtw'))}")
 
-# export the stock tickers and their cluster labels to a csv
-output_df = pd.DataFrame({ 
-    'Ticker': ratios_df['Ticker'].unique(), 
-    'Cluster': labels
-})
+#         # export the stock tickers and their cluster labels to a csv
+#         # pd.concat([output_df,concat_df], ignore_index=True)
 
-print(output_df)
+#         # print(output_list)
 
-# save to csv
-output_df.to_csv('q1_2022_stock_clusters.csv', index=False)
+#     # save to csv
 
+for num_clusters in range(2, 31):
+        model = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", max_iter=100, random_state=42)
+        labels = model.fit_predict(X_scaled_ts)
+        # model = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", max_iter=100, random_state=42)
+
+        output_list.append({
+            'Num Clusters': num_clusters,
+            'Silhouette Score': float(silhouette_score(X_scaled_ts, labels, metric="dtw"))
+        })
+
+        print(f"Num Clusters: {num_clusters}, Silhouette Score: {float(silhouette_score(X_scaled_ts, labels, metric='dtw'))}")
+
+        # export the stock tickers and their cluster labels to a csv
+        # pd.concat([output_df,concat_df], ignore_index=True)
+
+        # print(output_list)
+
+    # save to csv
+print(f"Saving results for whole model to csv...")
+output_df = pd.DataFrame(output_list)
+output_df.to_csv('q1_2022_stock_clusters_v2.csv', index=False)
+    
 # sz = 58 # number of months
 
 # for yi in range(num_clusters):
