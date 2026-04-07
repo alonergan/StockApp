@@ -1,0 +1,4 @@
+period, strategy, return
+q1_2022, buy_and_hold, -0.0641
+q1_2022, naive_algo, 0.07498
+q1_2022, clustered_algo, 0.03498

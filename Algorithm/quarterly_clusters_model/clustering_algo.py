@@ -15,8 +15,10 @@ import time # to see how long it takes to run the model.
 
 TRAIN_START  = "2019-07-01"
 TRAIN_END    = "2021-12-31"   # last training day before test window
-TEST_START   = "2022-01-03"
-TEST_END     = "2022-03-31"
+# TEST_START   = "2022-01-03"
+# TEST_END     = "2022-03-31"
+TEST_START   = "2022-04-01"
+TEST_END     = "2022-06-30"
  
 WINDOW_SIZE  = 90             # number of past days used as input
 EPOCHS       = 40
@@ -98,7 +100,7 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
 
 def export_signals_and_returns_to_csv(information):
     # export to json
-    with open('signals_and_returns.csv', 'a') as f:
+    with open('q2_2022_clustered_signals_and_returns.csv', 'a') as f:
         for item in information:
             f.write(','.join(map(str, item)) + '\n')
 
@@ -116,17 +118,13 @@ raw_open = df.pivot(columns='ticker',index='timestamp')['open']
 raw_close = df.pivot(columns='ticker',index='timestamp')['close']
 
 
-early_stop = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True)
-
-# ticker = "UE"
+early_stop = EarlyStopping(monitor='loss', patience=8, restore_best_weights=True)
 
 # FOR TESTING, doing less days
 # TEST_END = "2022-01-07"
 
 
-clusters_df = pd.read_csv("q1_2022_stock_clusters.csv")
-
-# clusters_df = clusters_df[clusters_df['Ticker'].isin(substocks)]
+clusters_df = pd.read_csv("stock_clusters_precompute_q1_2022.csv")
 
 print(clusters_df)
 
@@ -194,11 +192,12 @@ for cluster in clusters_df['Cluster'].unique():
             signal    = trading_signal(prev_close, actual_open, pred_price)
             return_t  = compute_trade_return(signal, actual_open, actual_close)
 
-            ticker_signals_and_returns.append((test_date, ticker, signal))
+            ticker_signals_and_returns.append((test_date, ticker, signal, return_t))
 
             print(f"Predicted: {pred_price:.2f}, Previous Close: {prev_close:.2f}, "
                   f"Actual Open: {actual_open:.2f}, Actual Close: {actual_close:.2f}, "
-                  f"Signal: {signal}\n")
+                  f"Signal: {signal}\n, "
+                  f"Return: {return_t:.4f}\n")
 
         export_signals_and_returns_to_csv(ticker_signals_and_returns)
 
