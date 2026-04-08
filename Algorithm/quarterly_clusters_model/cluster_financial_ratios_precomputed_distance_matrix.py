@@ -31,7 +31,7 @@ def compute_dtw_distance_matrix(X, weights=None):
     return dist_matrix
 
 
-def find_optimal_k(dist_matrix, k_range=range(5, 31)):
+def find_optimal_k(dist_matrix, k_range=range(2, 31)):
     """
     Sweeps k and returns silhouette scores for each k.
     """
@@ -45,14 +45,17 @@ def find_optimal_k(dist_matrix, k_range=range(5, 31)):
     return results
 
 
-ratios_df = pd.read_csv('all_stock_ratios.csv')
+ratios_df = pd.read_csv('clustering/all_stock_ratios_2021-q1_2026.csv')
+
+# for q2 2026, only use up to q4 2025
+ratios_df = ratios_df[ratios_df['fiscalDateEnding'] <= '2025-12-31']
 
 # if there are stocks without all the dates, remove that stock
 ratios_df = ratios_df.groupby('Ticker').filter(lambda x: len(x) == 58)
 
 #reducing the number of colummns
 # first two are not ratios. 
-# Had a poor individual score: net_income_minus_taxes_over_net_income, pretax_non_operating_over_sales, income_to_equity,working_capital_over_sales
+# Had a poor individual score for q2 2022: net_income_minus_taxes_over_net_income, pretax_non_operating_over_sales, income_to_equity,working_capital_over_sales
 cols_to_remove = ['dividend_per_share','relative_price_evolution','net_income_minus_taxes_over_net_income', 'pretax_non_operating_over_sales', 'income_to_equity','working_capital_over_sales']
 ratios_df = ratios_df.drop(columns=cols_to_remove)
 
@@ -72,9 +75,6 @@ print(f"we have the {ratios_df['Ticker'].nunique()} stocks with 58 months of dat
 
 # remove the 'Date' column
 ratios_df = ratios_df.drop(columns=['fiscalDateEnding'])
-
-# for testing, we can just use a subset of the data
-# ratios_df = ratios_df[ratios_df['Ticker'].isin(ratios_df['Ticker'].unique()[:33])]
 
 columns = ratios_df.columns[1:].to_list()
 
@@ -113,5 +113,5 @@ output_df = pd.DataFrame({
     'Ticker': ratios_df['Ticker'].unique(),
     'Cluster': labels
 })
-output_df.to_csv('stock_clusters_precompute_q1_2022.csv', index=False)
+output_df.to_csv('cluster_results/stock_clusters_precompute_q1_2026.csv', index=False)
 
