@@ -4,6 +4,7 @@ from django.conf import settings
 class Account(models.Model):
     startBalance = models.DecimalField(decimal_places=2, max_digits=12)
     balance = models.DecimalField(decimal_places=2, max_digits=12)
+    cashBalance = models.DecimalField(decimal_places=2, max_digits=12, default=0)
     riskLevel = models.IntegerField()
     thresholdPercentage = models.DecimalField(decimal_places=2, max_digits=12)
 
@@ -65,3 +66,11 @@ class StockPrice(models.Model):
 
     def __str__(self):
         return f"[{self.timeStamp}] - Stock: {self.stock}, Price: {self.price}"
+
+class ProcessorRun(models.Model):
+    runKey = models.CharField(max_length=255, unique=True, db_index=True)
+    sourceName = models.CharField(max_length=255)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.runKey

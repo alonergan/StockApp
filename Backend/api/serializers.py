@@ -10,7 +10,7 @@ User = get_user_model()
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id', 'startBalance', 'balance', 'riskLevel', 'thresholdPercentage']
+        fields = ['id', 'startBalance', 'cashBalance', 'balance', 'riskLevel', 'thresholdPercentage']
 
 
 class UserAccountSerializer(serializers.ModelSerializer):
@@ -64,7 +64,6 @@ class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True, min_length=8)
 
-    # These names match your frontend + Account fields (camelCase)
     startBalance = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
     riskLevel = serializers.IntegerField(required=False)
     thresholdPercentage = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
@@ -114,7 +113,8 @@ class RegisterSerializer(serializers.Serializer):
         # 2) Create the trading Account with provided settings
         account = Account.objects.create(
             startBalance=start_balance,
-            balance=start_balance,  # keep current balance equal to starting balance at registration
+            cash_balance=start_balance,
+            balance=start_balance, 
             riskLevel=risk_level,
             thresholdPercentage=threshold_pct,
         )
