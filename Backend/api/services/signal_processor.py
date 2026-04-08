@@ -6,7 +6,7 @@ from decimal import Decimal, ROUND_DOWN
 from django.db import transaction
 from django.utils import timezone
 
-from api.models import Account, AccountHolding, AccountStanding, Stock, Trade
+from api.models import Account, AccountHolding, AccountStanding, Stock
 from api.services.trading import execute_trade
 
 
@@ -54,13 +54,6 @@ def create_account_standing(account: Account, as_of):
     )
 
 
-def account_already_processed_for_run(account: Account, run_key: str) -> bool:
-    return Trade.objects.filter(
-        account=account,
-        method__endswith=f"|{run_key}",
-    ).exists()
-
-
 @transaction.atomic
 def process_one_account(
     *,
@@ -70,15 +63,9 @@ def process_one_account(
     stock_map: dict[str, Stock],
     price_map: dict[str, Decimal],
     as_of,
-    run_key: str,
     stats: ProcessingStats,
 ):
     account = Account.objects.select_for_update().get(pk=account_id)
-
-    if account_already_processed_for_run(account, run_key):
-        stats.skipped_already_processed += 1
-        return
-
     holdings_map = get_current_holdings_map(account)
 
     # SELLS FIRST
@@ -95,7 +82,7 @@ def process_one_account(
         execute_trade(
             account=account,
             stock=holding.stock,
-            method=f"SELL",
+            method="SELL",
             quantity=holding.quantity,
             price=price,
             time_stamp=as_of,
@@ -149,7 +136,7 @@ def process_one_account(
             execute_trade(
                 account=account,
                 stock=stock,
-                method=f"BUY",
+                method="BUY",
                 quantity=quantity,
                 price=price,
                 time_stamp=as_of,
@@ -165,7 +152,6 @@ def process_signal_run(
     *,
     signals: list[dict],
     price_map: dict[str, Decimal],
-    run_key: str,
     as_of=None,
 ) -> ProcessingStats:
     if as_of is None:
@@ -192,7 +178,6 @@ def process_signal_run(
             stock_map=stock_map,
             price_map=normalized_price_map,
             as_of=as_of,
-            run_key=run_key,
             stats=stats,
         )
 

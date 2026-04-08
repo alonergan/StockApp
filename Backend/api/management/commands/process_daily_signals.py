@@ -7,9 +7,9 @@ from django.utils import timezone
 
 from api.services.pricing import AlphaVantagePricingClient
 from api.services.signal_source import (
-    build_run_key,
     load_signals_csv_text,
     parse_signals,
+    build_run_key,
 )
 from api.services.signal_processor import process_signal_run
 
@@ -48,11 +48,9 @@ class Command(BaseCommand):
         local_directory = options.get("local_directory") or os.getenv("TRADE_SIGNAL_LOCAL_DIRECTORY")
         blob_container = options.get("blob_container") or os.getenv("TRADE_SIGNAL_BLOB_CONTAINER")
         blob_prefix = options.get("blob_prefix") or os.getenv("TRADE_SIGNAL_BLOB_PREFIX", "")
-        storage_connection_string = (
-            options.get("storage_connection_string")
-            or os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-        )
+        storage_connection_string = options.get("storage_connection_string") or os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 
+        self.stdout.write("Loading signal file...")
         csv_text, source_name = load_signals_csv_text(
             run_date=run_date,
             source_type=source_type,
@@ -61,31 +59,38 @@ class Command(BaseCommand):
             blob_container=blob_container,
             blob_prefix=blob_prefix,
         )
+        self.stdout.write(f"Loaded source: {source_name}")
 
+        self.stdout.write("Parsing signals...")
         signals = parse_signals(csv_text)
         if not signals:
             self.stdout.write(self.style.WARNING("No signals found. Nothing to process."))
             return
+        self.stdout.write(f"Parsed {len(signals)} signals")
 
         tickers = {signal.ticker for signal in signals}
         run_key = build_run_key(source_name, csv_text)
 
+        self.stdout.write("Fetching prices from Alpha Vantage...")
         pricing_client = AlphaVantagePricingClient(
             api_key=api_key,
             max_requests_per_minute=max_rpm,
         )
         price_map = pricing_client.get_prices(tickers)
+        self.stdout.write(f"Loaded {len(price_map)} prices")
+
+        self.stdout.write(f"Run date: {run_date.isoformat()}")
+        self.stdout.write(f"Source: {source_name}")
+        self.stdout.write(f"Run key: {run_key}")
+        self.stdout.write(f"Tickers requested: {len(tickers)}")
+        self.stdout.write(f"Prices loaded: {len(price_map)}")
 
         stats = process_signal_run(
             signals=[{"ticker": s.ticker, "action": s.action} for s in signals],
             price_map=price_map,
-            run_key=run_key,
         )
 
         self.stdout.write(self.style.SUCCESS("Signal processing complete"))
-        self.stdout.write(f"Run date: {run_date.isoformat()}")
-        self.stdout.write(f"Source: {source_name}")
-        self.stdout.write(f"Run key: {run_key}")
         self.stdout.write(f"Accounts processed: {stats.accounts_processed}")
         self.stdout.write(f"Sells executed: {stats.sells_executed}")
         self.stdout.write(f"Buys executed: {stats.buys_executed}")
