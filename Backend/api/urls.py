@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AccountViewSet, StockViewSet, AccountStandingViewSet,
     AccountHoldingViewSet, TradeViewSet, StockPriceViewSet, UserAccountViewSet,
-    register, me
+    register, me, process_signals_system
 )
 
 router = DefaultRouter()
@@ -20,4 +20,5 @@ urlpatterns = [
     path("", include(router.urls)),
     path("auth/register/", register),
     path("auth/me/", me),
+    path("system/process-signals/", process_signals_system),
 ]

@@ -9,11 +9,17 @@ from rest_framework.response import Response
 from django.db import transaction
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.http import JsonResponse
 from .models import Account, Stock, UserAccount, AccountStanding, AccountHolding, Trade, StockPrice
 from .serializers import RegisterSerializer, AccountSerializer, StockSerializer, UserAccountSerializer, AccountStandingSerializer, AccountHoldingSerializer, TradeSerializer, StockPriceSerializer
 from .filters import StockPriceFilter, TradeFilter, HoldingFilter, StandingFilter
 from decimal import Decimal, InvalidOperation
 from .services.trading import execute_trade
+from .services.signal_processor import process_signal_run
+import json
 
 User = get_user_model()
 
@@ -198,6 +204,35 @@ class StockPriceViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return StockPrice.objects.select_related("stock").order_by("-timeStamp")
+
+@csrf_exempt
+@require_POST
+def process_signals_system(request):
+    provided = request.headers.get("X-Processor-Key")
+    expected = getattr(settings, "PROCESSOR_SHARED_KEY", None)
+
+    if not expected or provided != expected:
+        return JsonResponse({"detail": "Unauthorized"}, status=401)
+
+    body = json.loads(request.body.decode("utf-8"))
+    run_key = body["runKey"]
+    signals = body["signals"]
+    prices = body["prices"]
+
+    stats = process_signal_run(
+        signals=signals,
+        price_map=prices,
+        run_key=run_key,
+    )
+
+    return JsonResponse({
+        "accountsProcessed": stats.accounts_processed,
+        "sellsExecuted": stats.sells_executed,
+        "buysExecuted": stats.buys_executed,
+        "skippedMissingStock": stats.skipped_missing_stock,
+        "skippedMissingPrice": stats.skipped_missing_price,
+        "skippedAlreadyProcessed": stats.skipped_already_processed,
+    })
 
 # Helpers
 def get_request_account(request):
