@@ -45,7 +45,7 @@ def load_signals_csv_text(
     blob_prefix: str | None = None,
 ) -> tuple[str, str]:
     """
-    Returns (csv_text, source_name)
+    Returns: (csv_text, source_name)
     """
     file_name = build_signal_filename(run_date)
 
@@ -104,12 +104,6 @@ def parse_signals(csv_text: str) -> list[Signal]:
         signals.append(Signal(ticker=ticker, action=action))
 
     return signals
-
-
-def split_signals(signals: list[Signal]) -> tuple[set[str], set[str]]:
-    buy_tickers = {s.ticker for s in signals if s.action == "BUY"}
-    sell_tickers = {s.ticker for s in signals if s.action == "SELL"}
-    return buy_tickers, sell_tickers
 
 
 def build_run_key(source_name: str, csv_text: str) -> str:
