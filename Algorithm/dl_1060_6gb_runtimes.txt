@@ -1,0 +1,12 @@
+time took to train 2 stocks with a window size of 30 for 4 days: 23.379
+
+time took to train 2 stocks with a window size of 30 for 90 days: 240.989 : 4 minutes. 2 minutes per.
+
+2 * 216 = 432 432/60 = 7.2 hours.
+
+program took 36371.7496471405 to run for Q1 of 2022 with the following parameters:
+This is 10.2 hrs. There was some downtime when my PC has shut
+off, about 2 hours.
+WINDOW_SIZE  = 30             # number of past days used as input
+EPOCHS       = 20
+BATCH_SIZE   = 32
