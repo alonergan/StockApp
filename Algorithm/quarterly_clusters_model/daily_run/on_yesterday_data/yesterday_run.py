@@ -43,7 +43,7 @@ BATCH_SIZE   = 32
 # ─────────────────────────────────────────────
 # Data loading
 # ─────────────────────────────────────────────
-def api_call(function, symbol, api_key):
+def api_call(function, symbol):
     url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={api_key}&datatype=csv&outputsize=full'
     r = requests.get(url)
     data = r.text
@@ -60,9 +60,10 @@ def load_data(api_key: str, clusters: str) -> pd.DataFrame:
     print("Loading data from API for stocks in clusters...")
     clusters_df = pd.read_csv(clusters)
     stock_list = clusters_df['Ticker'].unique().tolist()
+    daily_data_df = pd.DataFrame()
     frames = []
     for stock in stock_list:
-        stock_data = api_call('TIME_SERIES_DAILY', stock, api_key)
+        stock_data = api_call('TIME_SERIES_DAILY', stock)
         frames.append(stock_data)
         time.sleep(0.81) # sleep for 0.81 seconds to avoid hitting
 
