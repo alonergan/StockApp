@@ -86,17 +86,17 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
 
 def export_signals_and_returns_to_csv(information):
     # export to json
-    with open('signals_and_returns.csv', 'a') as f:
+    with open('naive_2022_apr_jun_signals_and_returns.csv', 'a') as f:
         for item in information:
             f.write(','.join(map(str, item)) + '\n')
 
 TRAIN_START  = "2019-07-01"
 TRAIN_END    = "2021-12-31"   # last training day before test window
-TEST_START   = "2022-01-03"
-TEST_END     = "2022-03-31"
+TEST_START   = "2022-04-01"
+TEST_END     = "2022-06-30"
  
-WINDOW_SIZE  = 30             # number of past days used as input
-EPOCHS       = 20
+WINDOW_SIZE  = 90             # number of past days used as input
+EPOCHS       = 40
 BATCH_SIZE   = 32
 
 df = pd.read_csv("aa_daily_data.csv")
