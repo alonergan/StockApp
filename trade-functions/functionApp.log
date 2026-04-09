@@ -1,0 +1,376 @@
+'local.settings.json' found in root directory (/home/jkhamthong/StockApp/trade-functions).
+Resolving worker runtime to 'python'.
+Found Python version 3.12.3 (python3).
+Selected out-of-process host.
+
+
+                  %%%%%%
+                 %%%%%%
+            @   %%%%%%    @
+          @@   %%%%%%      @@
+       @@@    %%%%%%%%%%%    @@@
+     @@      %%%%%%%%%%        @@
+       @@         %%%%       @@
+         @@      %%%       @@
+           @@    %%      @@
+                %%
+                %
+
+
+Azure Functions Core Tools
+Core Tools Version:       4.9.0+29aeab590e6c229a1a6631f6653df70f150f9f0e (64-bit)
+Function Runtime Version: 4.1047.100.26071
+
+Downloading extension bundles...
+[2026-04-08T23:33:40.312Z] Building host: version spec: , startup suppressed: 'False', configuration suppressed: 'False', startup operation id: '45a0a50b-246e-4a2d-a901-e041f3d1dbe9'
+[2026-04-08T23:33:40.330Z] Reading host configuration file '/home/jkhamthong/StockApp/trade-functions/host.json'
+[2026-04-08T23:33:40.331Z] Host configuration file read:
+[2026-04-08T23:33:40.331Z] {
+[2026-04-08T23:33:40.331Z]   "version": "2.0",
+[2026-04-08T23:33:40.331Z]   "logging": {
+[2026-04-08T23:33:40.331Z]     "applicationInsights": {
+[2026-04-08T23:33:40.331Z]       "samplingSettings": {
+[2026-04-08T23:33:40.331Z]         "isEnabled": true,
+[2026-04-08T23:33:40.331Z]         "excludedTypes": "Request"
+[2026-04-08T23:33:40.331Z]       }
+[2026-04-08T23:33:40.331Z]     }
+[2026-04-08T23:33:40.331Z]   },
+[2026-04-08T23:33:40.331Z]   "extensionBundle": {
+[2026-04-08T23:33:40.331Z]     "id": "Microsoft.Azure.Functions.ExtensionBundle",
+[2026-04-08T23:33:40.331Z]     "version": "[4.*, 5.0.0)"
+[2026-04-08T23:33:40.331Z]   }
+[2026-04-08T23:33:40.331Z] }
+[2026-04-08T23:33:40.343Z] Looking for extension bundle Microsoft.Azure.Functions.ExtensionBundle at /home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle
+[2026-04-08T23:33:40.343Z] Applying platform release channel configuration LATEST. Bundle version 4.32.0 will be used
+[2026-04-08T23:33:40.344Z] Found a matching extension bundle at /home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle/4.32.0
+[2026-04-08T23:33:40.363Z] Loading functions metadata
+[2026-04-08T23:33:40.364Z] Worker indexing is enabled
+[2026-04-08T23:33:40.366Z] Fetching metadata for workerRuntime: python
+[2026-04-08T23:33:40.366Z] Reading functions metadata (Worker)
+[2026-04-08T23:33:40.423Z]  INFO: Starting Azure Functions Python Worker.
+[2026-04-08T23:33:40.423Z]  INFO: Worker ID: 9a784b9a-f054-44de-bb99-4a608c59ebf0, Request ID: 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e, Host Address: 127.0.0.1:40499
+[2026-04-08T23:33:40.446Z]  INFO: Using allowed directories for shared memory: ['/dev/shm'] from App Setting: FUNCTIONS_UNIX_SHARED_MEMORY_DIRECTORIES
+[2026-04-08T23:33:40.459Z]  INFO: Successfully opened gRPC channel to 127.0.0.1:40499 
+[2026-04-08T23:33:40.459Z]  INFO: Detaching console logging.
+[2026-04-08T23:33:42.500Z] Switched to gRPC logging.
+[2026-04-08T23:33:42.512Z] Received WorkerInitRequest, python version 3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0], worker version 4.42.0, request ID 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e. App Settings state: PYTHON_THREADPOOL_THREAD_COUNT: 1000 | PYTHON_ENABLE_DEBUG_LOGGING: 1 | PYTHON_ENABLE_WORKER_EXTENSIONS: False. To enable debug level logging, please refer to https://aka.ms/python-enable-debug-logging
+[2026-04-08T23:33:42.590Z] Received WorkerMetadataRequest, request ID 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e, function_path: /home/jkhamthong/StockApp/trade-functions/function_app.py
+[2026-04-08T23:33:42.591Z] Indexed function app and found 1 functions
+[2026-04-08T23:33:42.591Z] Successfully processed FunctionMetadataRequest for functions: Function Name: run_algorithm, Function Binding: [('timerTrigger', 'myTimer', '')]. Deferred bindings enabled: False.
+[2026-04-08T23:33:42.608Z] 1 functions found (Worker)
+[2026-04-08T23:33:42.614Z] 1 functions loaded
+[2026-04-08T23:33:42.616Z] Looking for extension bundle Microsoft.Azure.Functions.ExtensionBundle at /home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle
+[2026-04-08T23:33:42.616Z] Applying platform release channel configuration LATEST. Bundle version 4.32.0 will be used
+[2026-04-08T23:33:42.616Z] Found a matching extension bundle at /home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle/4.32.0
+[2026-04-08T23:33:42.616Z] Loading extension bundle from /home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle/4.32.0/bin
+[2026-04-08T23:33:42.616Z] Script Startup resetting load context with base path: '/home/jkhamthong/.azure-functions-core-tools/Functions/ExtensionBundles/Microsoft.Azure.Functions.ExtensionBundle/4.32.0/bin'.
+[2026-04-08T23:33:42.622Z] Reading host configuration file '/home/jkhamthong/StockApp/trade-functions/host.json'
+[2026-04-08T23:33:42.622Z] Host configuration file read:
+[2026-04-08T23:33:42.622Z] {
+[2026-04-08T23:33:42.623Z]   "version": "2.0",
+[2026-04-08T23:33:42.623Z]   "logging": {
+[2026-04-08T23:33:42.623Z]     "applicationInsights": {
+[2026-04-08T23:33:42.623Z]       "samplingSettings": {
+[2026-04-08T23:33:42.623Z]         "isEnabled": true,
+[2026-04-08T23:33:42.623Z]         "excludedTypes": "Request"
+[2026-04-08T23:33:42.623Z]       }
+[2026-04-08T23:33:42.623Z]     }
+[2026-04-08T23:33:42.623Z]   },
+[2026-04-08T23:33:42.623Z]   "extensionBundle": {
+[2026-04-08T23:33:42.623Z]     "id": "Microsoft.Azure.Functions.ExtensionBundle",
+[2026-04-08T23:33:42.623Z]     "version": "[4.*, 5.0.0)"
+[2026-04-08T23:33:42.623Z]   }
+[2026-04-08T23:33:42.623Z] }
+[2026-04-08T23:33:42.647Z] Starting host metrics provider.
+[2026-04-08T23:33:42.702Z] Initializing Warmup Extension.
+[2026-04-08T23:33:42.723Z] Initializing Host. OperationId: '45a0a50b-246e-4a2d-a901-e041f3d1dbe9'.
+[2026-04-08T23:33:42.726Z] Host initialization: ConsecutiveErrors=0, StartupCount=1, OperationId=45a0a50b-246e-4a2d-a901-e041f3d1dbe9
+[2026-04-08T23:33:42.741Z] ScriptJobHostOptions
+[2026-04-08T23:33:42.741Z] {
+[2026-04-08T23:33:42.741Z]   "FileWatchingEnabled": true,
+[2026-04-08T23:33:42.741Z]   "FileLoggingMode": "DebugOnly",
+[2026-04-08T23:33:42.741Z]   "FunctionTimeout": "00:30:00",
+[2026-04-08T23:33:42.741Z]   "TelemetryMode": "ApplicationInsights"
+[2026-04-08T23:33:42.741Z] }
+[2026-04-08T23:33:42.741Z] LoggerFilterOptions
+[2026-04-08T23:33:42.741Z] {
+[2026-04-08T23:33:42.741Z]   "MinLevel": "None",
+[2026-04-08T23:33:42.741Z]   "Rules": [
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": null,
+[2026-04-08T23:33:42.741Z]       "CategoryName": "Microsoft.Hosting.Lifetime",
+[2026-04-08T23:33:42.741Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.741Z]       "Filter": null
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.741Z]       "Filter": null
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": null,
+[2026-04-08T23:33:42.741Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": null,
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": null,
+[2026-04-08T23:33:42.741Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": null,
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": null,
+[2026-04-08T23:33:42.741Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": null,
+[2026-04-08T23:33:42.741Z]       "CategoryName": "Function",
+[2026-04-08T23:33:42.741Z]       "LogLevel": "Information",
+[2026-04-08T23:33:42.741Z]       "Filter": null
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": "Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics.SystemLoggerProvider",
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.741Z]       "Filter": null
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": "Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics.SystemLoggerProvider",
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": null,
+[2026-04-08T23:33:42.741Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.741Z]     },
+[2026-04-08T23:33:42.741Z]     {
+[2026-04-08T23:33:42.741Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.741Z]       "CategoryName": null,
+[2026-04-08T23:33:42.741Z]       "LogLevel": null,
+[2026-04-08T23:33:42.741Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.741Z]     }
+[2026-04-08T23:33:42.741Z]   ]
+[2026-04-08T23:33:42.742Z] }
+[2026-04-08T23:33:42.742Z] LoggerFilterOptions
+[2026-04-08T23:33:42.742Z] {
+[2026-04-08T23:33:42.742Z]   "MinLevel": "None",
+[2026-04-08T23:33:42.742Z]   "Rules": [
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": null,
+[2026-04-08T23:33:42.742Z]       "CategoryName": "Microsoft.Hosting.Lifetime",
+[2026-04-08T23:33:42.742Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.742Z]       "Filter": null
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.742Z]       "Filter": null
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": null,
+[2026-04-08T23:33:42.742Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": null,
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": null,
+[2026-04-08T23:33:42.742Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": null,
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": null,
+[2026-04-08T23:33:42.742Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": null,
+[2026-04-08T23:33:42.742Z]       "CategoryName": "Function",
+[2026-04-08T23:33:42.742Z]       "LogLevel": "Information",
+[2026-04-08T23:33:42.742Z]       "Filter": null
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": "Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics.SystemLoggerProvider",
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": "None",
+[2026-04-08T23:33:42.742Z]       "Filter": null
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": "Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics.SystemLoggerProvider",
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": null,
+[2026-04-08T23:33:42.742Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.742Z]     },
+[2026-04-08T23:33:42.742Z]     {
+[2026-04-08T23:33:42.742Z]       "ProviderName": "Azure.Functions.Cli.Diagnostics.ColoredConsoleLoggerProvider",
+[2026-04-08T23:33:42.742Z]       "CategoryName": null,
+[2026-04-08T23:33:42.742Z]       "LogLevel": null,
+[2026-04-08T23:33:42.742Z]       "Filter": "<AddFilter>b__0"
+[2026-04-08T23:33:42.742Z]     }
+[2026-04-08T23:33:42.742Z]   ]
+[2026-04-08T23:33:42.742Z] }
+[2026-04-08T23:33:42.742Z] HttpWorkerOptions
+[2026-04-08T23:33:42.742Z] {
+[2026-04-08T23:33:42.742Z]   "Type": 0,
+[2026-04-08T23:33:42.743Z]   "Description": null,
+[2026-04-08T23:33:42.743Z]   "Arguments": null,
+[2026-04-08T23:33:42.743Z]   "Port": 40271,
+[2026-04-08T23:33:42.743Z]   "IsPortManuallySet": false,
+[2026-04-08T23:33:42.743Z]   "EnableForwardingHttpRequest": false,
+[2026-04-08T23:33:42.743Z]   "EnableProxyingHttpRequest": false,
+[2026-04-08T23:33:42.743Z]   "InitializationTimeout": "00:00:30",
+[2026-04-08T23:33:42.743Z]   "CustomRoutesEnabled": false,
+[2026-04-08T23:33:42.743Z]   "Http": null
+[2026-04-08T23:33:42.743Z] }
+[2026-04-08T23:33:42.743Z] FunctionResultAggregatorOptions
+[2026-04-08T23:33:42.743Z] {
+[2026-04-08T23:33:42.743Z]   "BatchSize": 1000,
+[2026-04-08T23:33:42.743Z]   "FlushTimeout": "00:00:30",
+[2026-04-08T23:33:42.743Z]   "IsEnabled": true
+[2026-04-08T23:33:42.743Z] }
+[2026-04-08T23:33:42.743Z] ConcurrencyOptions
+[2026-04-08T23:33:42.743Z] {
+[2026-04-08T23:33:42.743Z]   "DynamicConcurrencyEnabled": false,
+[2026-04-08T23:33:42.743Z]   "MaximumFunctionConcurrency": 500,
+[2026-04-08T23:33:42.743Z]   "CPUThreshold": 0.8,
+[2026-04-08T23:33:42.743Z]   "SnapshotPersistenceEnabled": true
+[2026-04-08T23:33:42.743Z] }
+[2026-04-08T23:33:42.743Z] SingletonOptions
+[2026-04-08T23:33:42.743Z] {
+[2026-04-08T23:33:42.743Z]   "LockPeriod": "00:00:15",
+[2026-04-08T23:33:42.743Z]   "ListenerLockPeriod": "00:00:15",
+[2026-04-08T23:33:42.743Z]   "LockAcquisitionTimeout": "10675199.02:48:05.4775807",
+[2026-04-08T23:33:42.743Z]   "LockAcquisitionPollingInterval": "00:00:05",
+[2026-04-08T23:33:42.743Z]   "ListenerLockRecoveryPollingInterval": "00:01:00"
+[2026-04-08T23:33:42.743Z] }
+[2026-04-08T23:33:42.743Z] ScaleOptions
+[2026-04-08T23:33:42.743Z] {
+[2026-04-08T23:33:42.743Z]   "ScaleMetricsMaxAge": "00:02:00",
+[2026-04-08T23:33:42.743Z]   "ScaleMetricsSampleInterval": "00:00:10",
+[2026-04-08T23:33:42.743Z]   "MetricsPurgeEnabled": true,
+[2026-04-08T23:33:42.743Z]   "IsTargetScalingEnabled": true,
+[2026-04-08T23:33:42.743Z]   "IsRuntimeScalingEnabled": false
+[2026-04-08T23:33:42.743Z] }
+[2026-04-08T23:33:42.744Z] Starting JobHost
+[2026-04-08T23:33:42.746Z] Starting Host (HostId=babyice-260653604, InstanceId=4f285a97-2c50-4a21-9688-d42ed6198267, Version=4.1047.100.26071, ProcessId=3387, AppDomainId=1, InDebugMode=False, InDiagnosticMode=False, FunctionsExtensionVersion=(null))
+[2026-04-08T23:33:42.749Z] Loading functions metadata
+[2026-04-08T23:33:42.749Z] Worker indexing is enabled
+[2026-04-08T23:33:42.749Z] Fetching metadata for workerRuntime: python
+[2026-04-08T23:33:42.749Z] Reading functions metadata (Worker)
+[2026-04-08T23:33:42.751Z] Reading functions metadata (Custom)
+[2026-04-08T23:33:42.756Z] 0 functions found (Custom)
+[2026-04-08T23:33:42.759Z] 1 functions loaded
+[2026-04-08T23:33:42.775Z] Generating 1 job function(s)
+[2026-04-08T23:33:42.775Z] Worker process started and initialized.
+[2026-04-08T23:33:42.776Z] Received WorkerLoadRequest, request ID 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e, function_id: d8232b99-2435-5380-bcba-566c6d71f0b4,function_name: run_algorithm, function_app_directory : /home/jkhamthong/StockApp/trade-functions
+[2026-04-08T23:33:42.776Z] Successfully processed FunctionLoadRequest, request ID: 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e, function ID: d8232b99-2435-5380-bcba-566c6d71f0b4,function Name: run_algorithm,programming model: V2
+[2026-04-08T23:33:42.796Z] Found the following functions:
+[2026-04-08T23:33:42.796Z] Host.Functions.run_algorithm
+[2026-04-08T23:33:42.796Z] 
+[2026-04-08T23:33:42.802Z] HttpOptions
+[2026-04-08T23:33:42.802Z] {
+[2026-04-08T23:33:42.802Z]   "DynamicThrottlesEnabled": false,
+[2026-04-08T23:33:42.802Z]   "EnableChunkedRequestBinding": false,
+[2026-04-08T23:33:42.802Z]   "MaxConcurrentRequests": -1,
+[2026-04-08T23:33:42.802Z]   "MaxOutstandingRequests": -1,
+[2026-04-08T23:33:42.802Z]   "RoutePrefix": "api"
+[2026-04-08T23:33:42.802Z] }
+[2026-04-08T23:33:42.803Z] Initializing function HTTP routes
+[2026-04-08T23:33:42.803Z] No HTTP routes mapped
+[2026-04-08T23:33:42.803Z] 
+[2026-04-08T23:33:42.806Z] Host initialized (56ms)
+
+Functions:
+
+	run_algorithm: timerTrigger
+
+[2026-04-08T23:33:42.852Z] The next 5 occurrences of the 'run_algorithm' schedule (Cron: '0 0,30 * * * *') will be:
+[2026-04-08T23:33:42.852Z] 04/08/2026 19:00:00-05:00 (04/09/2026 00:00:00Z)
+[2026-04-08T23:33:42.852Z] 04/08/2026 19:30:00-05:00 (04/09/2026 00:30:00Z)
+[2026-04-08T23:33:42.852Z] 04/08/2026 20:00:00-05:00 (04/09/2026 01:00:00Z)
+[2026-04-08T23:33:42.852Z] 04/08/2026 20:30:00-05:00 (04/09/2026 01:30:00Z)
+[2026-04-08T23:33:42.852Z] 04/08/2026 21:00:00-05:00 (04/09/2026 02:00:00Z)
+[2026-04-08T23:33:42.852Z] 
+[2026-04-08T23:33:42.856Z] Host started (109ms)
+[2026-04-08T23:33:42.856Z] Job host started
+[2026-04-08T23:33:42.873Z] Executing 'Functions.run_algorithm' (Reason='Timer fired at 2026-04-08T18:33:42.8583684-05:00', Id=87dcc931-2297-4283-8e75-ad04884c8e64)
+[2026-04-08T23:33:42.873Z] Trigger Details: UnscheduledInvocationReason: RunOnStartup
+[2026-04-08T23:33:42.895Z] Received FunctionInvocationRequest, request ID: 75d11db6-cfe9-40d7-866a-2f5f0e4bf33e, function ID: d8232b99-2435-5380-bcba-566c6d71f0b4, function name: run_algorithm, invocation ID: 87dcc931-2297-4283-8e75-ad04884c8e64, function type: sync, timestamp (UTC): 2026-04-08 23:33:42.894297, sync threadpool max workers: 1000
+[2026-04-08T23:33:42.898Z] Trigger started.
+[2026-04-08T23:33:42.898Z] Running script: /home/jkhamthong/StockApp/Algorithm/MACross.py
+[2026-04-08T23:33:47.750Z] Host lock lease acquired by instance ID '000000000000000000000000A3B981BE'.
+[2026-04-08T23:35:03.037Z] 
+[2026-04-08T23:35:03.037Z] === TOP SELECTED STOCKS ===
+[2026-04-08T23:35:03.037Z] 
+[2026-04-08T23:35:03.037Z]     Ticker       Score
+[2026-04-08T23:35:03.037Z] 250   KLAC  237.032766
+[2026-04-08T23:35:03.037Z] 153   EQIX  146.240671
+[2026-04-08T23:35:03.037Z] 457    WDC  122.455997
+[2026-04-08T23:35:03.037Z] 
+[2026-04-08T23:35:03.037Z] ===== TRADING KLAC =====
+[2026-04-08T23:35:03.037Z] 
+[2026-04-08T23:35:03.037Z] 2025-09-18 → BUY at $1043.58
+[2026-04-08T23:35:03.037Z] 2025-10-10 → STOP LOSS SELL at $979.83 | P/L: $-610.88 (-6.11%)
+[2026-04-08T23:35:03.037Z] 
+[2026-04-08T23:35:03.037Z] --- Trade Summary ---
+[2026-04-08T23:35:03.037Z] Total Profit from Trades: $-610.88
+[2026-04-08T23:35:03.037Z] Wins: 0, Losses: 1
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] ===== TRADING EQIX =====
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] --- Trade Summary ---
+[2026-04-08T23:35:03.038Z] Total Profit from Trades: $0.00
+[2026-04-08T23:35:03.038Z] Wins: 0, Losses: 0
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] ===== TRADING WDC =====
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] --- Trade Summary ---
+[2026-04-08T23:35:03.038Z] Total Profit from Trades: $0.00
+[2026-04-08T23:35:03.038Z] Wins: 0, Losses: 0
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z] === FINAL RESULTS ===
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.038Z]   Ticker  Final Value  Profit  Return (%)  Wins  Losses
+[2026-04-08T23:35:03.038Z] 0   KLAC      9389.12 -610.88       -6.11     0       1
+[2026-04-08T23:35:03.038Z] 1   EQIX     10000.00    0.00        0.00     0       0
+[2026-04-08T23:35:03.038Z] 2    WDC     10000.00    0.00        0.00     0       0
+[2026-04-08T23:35:03.038Z] 
+[2026-04-08T23:35:03.039Z] Python timer trigger function finished successfully.
+[2026-04-08T23:35:03.048Z] Executed 'Functions.run_algorithm' (Succeeded, Id=87dcc931-2297-4283-8e75-ad04884c8e64, Duration=80186ms)
+[2026-04-08T23:35:33.423Z]  WARNING: Switched to console logging due to exception.
+[2026-04-08T23:35:33.423Z] Detaching gRPC logging due to exception.
+[2026-04-08T23:35:33.425Z] Traceback (most recent call last):
+[2026-04-08T23:35:33.425Z]   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+[2026-04-08T23:35:33.425Z]     return self._loop.run_until_complete(task)
+[2026-04-08T23:35:33.425Z]   File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+[2026-04-08T23:35:33.426Z]     return future.result()
+[2026-04-08T23:35:33.426Z]   File "/home/jkhamthong/.nvm/versions/node/v24.13.0/lib/node_modules/azure-functions-core-tools/bin/workers/python/3.12/LINUX/X64/azure_functions_worker/main.py", line 78, in start_async
+[2026-04-08T23:35:33.426Z]     await disp.dispatch_forever()
+[2026-04-08T23:35:33.426Z]   File "/home/jkhamthong/.nvm/versions/node/v24.13.0/lib/node_modules/azure-functions-core-tools/bin/workers/python/3.12/LINUX/X64/azure_functions_worker/dispatcher.py", line 207, in dispatch_forever
+[2026-04-08T23:35:33.426Z]     await forever
+[2026-04-08T23:35:33.426Z] asyncio.exceptions.CancelledError
+[2026-04-08T23:35:33.426Z] During handling of the above exception, another exception occurred:
+[2026-04-08T23:35:33.426Z] Traceback (most recent call last):
+[2026-04-08T23:35:33.427Z]   File "/home/jkhamthong/.nvm/versions/node/v24.13.0/lib/node_modules/azure-functions-core-tools/bin/workers/python/3.12/LINUX/X64/worker.py", line 71, in <module>
+[2026-04-08T23:35:33.427Z] Stopping host...
+[2026-04-08T23:35:33.427Z]     main.main()
+[2026-04-08T23:35:33.427Z]   File "/home/jkhamthong/.nvm/versions/node/v24.13.0/lib/node_modules/azure-functions-core-tools/bin/workers/python/3.12/LINUX/X64/azure_functions_worker/main.py", line 61, in main
+[2026-04-08T23:35:33.427Z]     return asyncio.run(start_async(
+[2026-04-08T23:35:33.427Z]   File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+[2026-04-08T23:35:33.427Z]     return runner.run(main)
+[2026-04-08T23:35:33.427Z]   File "/usr/lib/python3.12/asyncio/runners.py", line 123, in run
+[2026-04-08T23:35:33.428Z]     raise KeyboardInterrupt()
+[2026-04-08T23:35:33.428Z] KeyboardInterrupt
+[2026-04-08T23:35:33.430Z] Stopping JobHost
+[2026-04-08T23:35:33.432Z] Stopping the listener 'Microsoft.Azure.WebJobs.Host.Listeners.SingletonListener' for function 'run_algorithm'
+[2026-04-08T23:35:33.440Z] Stopped the listener 'Microsoft.Azure.WebJobs.Host.Listeners.SingletonListener' for function 'run_algorithm'
+[2026-04-08T23:35:33.441Z] Job host stopped
+[2026-04-08T23:35:33.448Z] Language Worker Process exited. Pid=3416.
+[2026-04-08T23:35:33.448Z] Microsoft.Azure.WebJobs.Script.Grpc: python3 exited with code 130 (0x82). asyncio.exceptions.CancelledError.
+[2026-04-08T23:35:33.453Z] Host shutdown completed.
+[2026-04-08T23:35:33.454Z] Shutting down language worker channels for runtime:python
