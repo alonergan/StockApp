@@ -1,30 +1,30 @@
 Daniel Lillard - Sprint 2 Reflection
 
 Daniel Lillard, danllill, StockApp Group
-What I Planned To Do
+# What I Planned To Do
 
 - get a tensorflow docker container up
 - After performing LSTM training on clusters of DTW k-means, integrate that. (reliant on the Do this over the 2017-Q1 2022 data header)
 - Integrate the naive LSTM over individual stocks
 
 
-What I Did Not Do
+# What I Did Not Do
 
-    N/A - All tasks accomplished
+N/A - All tasks accomplished
 
-Issues Completed
+# Issues Completed
 
 - Trained model to good returns.
 - Found issues with financial ratios and improved clustering.
 - Set up our training pipeline
 
-Files You Worked On
+# Files You Worked On
 
-    Backend/api/management/commands/process_daily_signals.py
-    Backend/api/services/pricing.py
-    Backend/api/services/trading.py
-    Backend/api/services/signal_processor.py
-    Backend/api/services/signal_source.py
+- Algorithm/Dockerfile
+- Algorithm/returns.csv
+- Algorithm/testing_algorithms_returns.ipynb
+- Algorithm/basic_lstm_no_clusters.ipynb
+- Algorithm/quarterly_clusters_model/*
 
 # Use of AI / 3rtd Party Software
 
