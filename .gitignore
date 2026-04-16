@@ -8,3 +8,6 @@ Algorithm/combined_data.csv
 Algorithm/api_key.txt
 Algorithm/aa_daily_data.csv
 Algorithm/quarterly_clusters_model/aa_daily_data.csv
+./Backend/.env
+./Frontend/.env
+*.env
