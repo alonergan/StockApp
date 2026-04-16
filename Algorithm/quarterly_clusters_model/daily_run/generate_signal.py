@@ -1,15 +1,23 @@
 # Author: Danny Lillard
 # Date: 2026-04-08
 # Desc: This file generates the signal for the daily run at market open.
-
 import pandas as pd
 import requests
 import io
 import time
+from datetime import date
+from dotenv import load_dotenv
+import os
+from azure.storage.blob import BlobServiceClient
+from pathlib import Path
 
 # ─────────────────────────────────────────────
 # Data loading
 # ─────────────────────────────────────────────
+load_dotenv(Path(__file__).resolve().parents[3] / "Backend" /".env")
+print("ENV CHECK:", os.getenv("AZURE_STORAGE_CONNECTION_STRING"))
+currentDate = date.today().strftime("%Y%m%d")
+
 def api_call(function, symbol, api_key):
     url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={api_key}&datatype=csv&outputsize=full'
     r = requests.get(url)
@@ -58,19 +66,48 @@ def compute_trade_return(signal: str, open_t: float, close_t: float) -> float:
     return 0.0
 
 def export_signals_and_returns_to_csv(information):
-    todays_date = information[0][0]  # assuming all signals are for the same date
-    print(f"Exporting signals for {todays_date} to CSV...")
+    print(f"Exporting signals for {currentDate} to CSV...")
     # export to json
-    with open(f'Trade_Signals_{todays_date}.csv', 'a') as f:
+    with open(f'Trade_Signals_{currentDate}.csv', 'a') as f:
         f.write('timestamp,ticker,signal\n')
         for item in information:
             f.write(','.join(map(str, item)) + '\n')
+
+# ─────────────────────────────────────────────
+# FUNCTION TO UPLOAD THE GENERATED SIGNALS TO AZURE BLOB STORAGE
+# ─────────────────────────────────────────────
+def upload_signals_to_blob():    
+    conn_str = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    container_name = os.getenv("ALGO_SIGNAL_CONTAINER")
+
+    BASE_DIR = Path(__file__).resolve().parents[3]
+    file_path = BASE_DIR / "Algorithm" / "quarterly_clusters_model" / "daily_run" / f"Trade_Signals_{currentDate}.csv"
+
+    if not conn_str:
+        print("Missing AZURE_STORAGE_CONNECTION_STRING")
+        return
+
+    print("Connecting to Azure Blob Storage...")
+
+    try:
+        client = BlobServiceClient.from_connection_string(conn_str)
+        container_client = client.get_container_client(container_name)
+
+        #Uploading CSV to blob storage    
+        blob_name = f"Trade_Signals_{currentDate}.csv"
+        blob_client = container_client.get_blob_client(blob_name)
+        with open(file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+        print("\n New Signal csv uploaded successfully!")
+
+    except Exception as e:
+        print("\nCould not upload to Azure Blob Storage")
+        print(e)
 
 # we need to do the following steps:
 # 1. Load the predictions for today.
 # 2. Load the stock data for today. (open price is all we need)
 # 3. For each stock, compute the trading signal based on the predicted price and the open price.
-
 
 # 1
 predictions_df = pd.read_csv('Predictions_2026-04-08.csv')
@@ -98,3 +135,4 @@ for test_date, ticker in full_df[['timestamp', 'ticker']].values:
 print(signals)
 
 export_signals_and_returns_to_csv(signals)
+upload_signals_to_blob()
