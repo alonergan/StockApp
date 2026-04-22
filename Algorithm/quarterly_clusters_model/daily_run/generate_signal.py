@@ -5,7 +5,7 @@ import pandas as pd
 import requests
 import io
 import time
-from datetime import date
+from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
 import os
 from azure.storage.blob import BlobServiceClient
@@ -15,8 +15,7 @@ from pathlib import Path
 # Data loading
 # ─────────────────────────────────────────────
 load_dotenv(Path(__file__).resolve().parents[3] / "Backend" /".env")
-print("ENV CHECK:", os.getenv("AZURE_STORAGE_CONNECTION_STRING"))
-currentDate = date.today().strftime("%Y%m%d")
+currentDate = date.today().strftime("%m%d%Y")
 
 def api_call(function, symbol, api_key):
     url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={api_key}&datatype=csv&outputsize=full'
@@ -110,7 +109,9 @@ def upload_signals_to_blob():
 # 3. For each stock, compute the trading signal based on the predicted price and the open price.
 
 # 1
-predictions_df = pd.read_csv('Predictions_2026-04-08.csv')
+date_str = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+predictions_df = pd.read_csv(f'Predictions_{date_str}.csv')
+#predictions_df = pd.read_csv('Predictions_2026-04-16.csv')
 
 # 2
 api_key = 'K95O6J38RTNG8IRS'
