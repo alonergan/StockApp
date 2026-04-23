@@ -355,19 +355,19 @@ export default function Dashboard() {
             <Spin spinning={loading}>
                 <Row gutter={[16, 16]}>
                     {/* Row 1: Summary cards */}
-                    <Col span={8}>
-                        <Card style={{ width: "100%" }} title="Principle">
+                    <Col span={7}>
+                        <Card style={{ width: "100%" }} title="Current Balance">
                             <Statistic
-                                value={account?.startBalance}
+                                value={standings.at(-1)?.balance}
                                 precision={2}
                                 prefix="$"
                             />
                         </Card>
                     </Col>
                     <Col span={7}>
-                        <Card style={{ width: "100%" }} title="Current Balance">
+                        <Card style={{ width: "100%" }} title="Cash Balance">
                             <Statistic
-                                value={standings.at(-1)?.balance}
+                                value={account?.cashBalance}
                                 precision={2}
                                 prefix="$"
                             />

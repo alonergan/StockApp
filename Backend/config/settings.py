@@ -33,6 +33,8 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if
 
 ALLOWED_HOSTS += [
     "cosc540-stockapp-backend.azurewebsites.net",
+    "169.254.130.2:8000",
+    "169.254.130.2"
 ]
 
 # Application definition

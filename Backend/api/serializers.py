@@ -25,7 +25,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
 class AccountStandingSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountStanding
-        fields = ['id', 'account', 'balance', 'timeStamp']
+        fields = ['id', 'account', 'balance', 'timeStamp', 'cashBalance']
 
 
 class AccountHoldingSerializer(serializers.ModelSerializer):

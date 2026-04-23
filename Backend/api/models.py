@@ -29,6 +29,7 @@ class UserAccount(models.Model):
 class AccountStanding(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     balance = models.DecimalField(decimal_places=2, max_digits=12)
+    cashBalance = models.DecimalField(decimal_places=2, max_digits=12, default=0)
     timeStamp = models.DateTimeField()
 
     def __str__(self):
