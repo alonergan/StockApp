@@ -1,13 +1,13 @@
-﻿# project name - StockApp
-# members
--Jay Khamthong   github: jmkhamdevelops-cloud
--Aidan Lonergan  github: alonergan
--Grant Alderson  github: galderso
--Daniel Lillard  github: DLillard12
+﻿# Project Name - StockApp
+# Members
+-Jay Khamthong   github: jmkhamdevelops-cloud <br/>
+-Aidan Lonergan  github: alonergan <br/>
+-Grant Alderson  github: galderso <br/>
+-Daniel Lillard  github: DLillard12 <br/>
 
 
-# logo
-<img src="path/to/logo.png" alt="Logo" width="200"/>
+# Logo
+<img src="0ade088a-3c0b-47e4-8303-46966085ea2c.png" alt="Logo" width="200"/>
 
 # Discription
 
