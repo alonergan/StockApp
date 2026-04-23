@@ -1,4 +1,20 @@
-﻿# StockApp — Local Development Setup Guide (Windows)
+﻿# project name - StockApp
+# members
+-Jay Khamthong   github: jmkhamdevelops-cloud
+-Aidan Lonergan  github: alonergan
+-Grant Alderson  github: galderso
+-Daniel Lillard  github: DLillard12
+
+
+# logo
+<img src="path/to/logo.png" alt="Logo" width="200"/>
+
+# Discription
+
+A full stack web application for algorithmic swing trading. This application will use react to create a usable, dynamic user experience that would interface with our django backend and postgres sql database. The core of our project will be utilizing an algorithm that the team has chosen after some thorough research. Our stock trade will depend on this chosen algorithm, and the application will swing trade on our behalf.  We will be using past trends for data modeling and graphically display the results in an interactive dashboard that would allow the user to view reports on their investment and what those investments are.
+
+
+# StockApp — Local Development Setup Guide (Windows)
 
 This project runs:
 
@@ -188,3 +204,10 @@ Start Frontend:
 - PostgreSQL is the source of truth
 - Future trading engine will be a background worker writing to the database
 - Frontend reads latest state from the database via API
+
+
+# How to use
+
+
+# License
+[Open text file](lICENSE.txt)
