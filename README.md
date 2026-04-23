@@ -1,84 +1,214 @@
-# StockApp
-An automated trading application with web interface.
+﻿# project name - StockApp
+# members
+-Jay Khamthong   github: jmkhamdevelops-cloud
+-Aidan Lonergan  github: alonergan
+-Grant Alderson  github: galderso
+-Daniel Lillard  github: DLillard12
 
-Project Idea
-A full stack web application for algorithmic swing trading. This application would use React that would interface with a django backend and postgres sql. This will automate algorithms for swing trading and bid on our behalf.  We would be using past trends for data modeling and graphically display the results in an interactive UI.
 
-Basic User Requirements
-As a user I want to be able to access this website from any platform so that I can check in on my investments anywhere
-As a user I want to be able to create an account so that I can deposit, manage, and withdrawal my funds
-As a user I want to be able to set the risk tolerance of my investments so that I can mitigate potential losses
-As a user I want to choose a threshold to automatically withdrawal my investments so that I can obtain the maximum value from them
-As a user I want to have the application manage my finances and investments so that I do not have to manually manage my investments
-As a user I want to have a main dashboard where I can see my current investments and portfolio performance so that I can monitor the effectiveness of the automatic portfolio management
-As a user I want to have the ability to see a log of trades for my portfolio so that I can see how the application is managing my funds
-As a user I want to have the ability to stop automatic portfolio management and divest my holdings so that I can withdrawal my funds
+# logo
+<img src="path/to/logo.png" alt="Logo" width="200"/>
 
-Product Requirements
-Platform Accessibility
-Requirement: The website should be accessible from web browser
-Details:
-Web-based UI
-Supported browsers: Chromium based browsers, Safari
-Desktop only layout
-Acceptance Criteria:
-Users can access the website from any chromium based or safari browser
-The website UI adapts to changing screen sizes
-User Account Management
-Requirement: The website shall allow users to create and manage an account to handle funds and investments
-Details:
-User registration, authentication, and session management
-User ability to deposit funds, withdrawal funds, and view balances
-Acceptance Criteria:
-User can successfully create an account
-User can login to their account
-User can logout of their account
-User deposits and withdrawals are accurately reflected in account balances
-Risk Tolerance Configuration
-Requirement: The website shall allow users to define a risk tolerance level for their investments
-Details:
-Risk level can be set to the following values [LOW, MEDIUM, HIGH]
-Risk level directly affects portfolio allocation and trading strategy
-Acceptance Criteria:
-Risk tolerance level is editable by user and saved to their account
-Portfolio behavior adjusts according to the selected risk level
-Automated Withdrawal Thresholds
-Requirement: The website shall allow users to define a threshold that will trigger automatic withdrawals
-Details:
-Threshold is set by the user and is a numeric value
-Automatic execution when the threshold is reached with no manual intervention
-Acceptance Criteria:
-Withdrawals are triggered when the thresholds are met
-Users receives notice on the dashboard when threshold triggers a withdrawal
-Automated Portfolio Management
-Requirement: The website shall automatically manage user investments based on a trading algorithm and predefined rules and strategies
-Details:
-Application continuously monitors the market conditions
-Automated trade execution aligned with user’s set risk tolerance
-No manual trading is allowed by the user
-Acceptance Criteria:
-Trades are executed without user intervention
-Portfolio changes are consistent with user risk tolerance
-User Manual Withdrawal
-Requirement: The website shall allow a user to stop automatic portfolio management and divest the current holdings
-Details:
-User can click a button on the account management screen to divest all holdings and allow them to withdrawal their funds
-Acceptance Criteria:
-Holdings are divested upon clicking the button
-User can withdrawal funds after divestment
-Portfolio Dashboard
-Requirement: The website shall provide a main dashboard summarizing portfolio status and performance
-Details:
-Shows current holdings, balances, and tick data
-Shows performance metrics including gains and losses over time
-Near real time updates (if possible)
-Acceptance Criteria:
-Dashboard reflects accurate and up to date portfolio data
-Dashboard is the first screen to show when user enters the website
-Trade History and Audit Log
-Requirement: The website shall maintain a detailed log of all trades executed on behalf of the user. The user shall be able to view this log as a tab in the website.
-Details:
-Timestamped record of buys, sells, and withdrawals
-Acceptance Criteria:
-Users can view a complete chronological trade history
-Logged data matches portfolio changes
+# Discription
+
+A full stack web application for algorithmic swing trading. This application will use react to create a usable, dynamic user experience that would interface with our django backend and postgres sql database. The core of our project will be utilizing an algorithm that the team has chosen after some thorough research. Our stock trade will depend on this chosen algorithm, and the application will swing trade on our behalf.  We will be using past trends for data modeling and graphically display the results in an interactive dashboard that would allow the user to view reports on their investment and what those investments are.
+
+
+# StockApp — Local Development Setup Guide (Windows)
+
+This project runs:
+
+- PostgreSQL (Docker)
+- Django + Django REST Framework (Backend)
+- React (Frontend)
+
+This guide will get everything running locally.
+
+---
+
+# 1️⃣ Prerequisites
+
+Install:
+
+- Git  
+- Python 3.x  
+- Node.js (LTS)  
+- Docker Desktop (WSL2 enabled)
+
+Verify installation:
+
+    python --version
+    node --version
+    npm --version
+    docker --version
+    docker compose version
+
+---
+
+# 2️⃣ Clone the Repository
+
+    git clone <REPO_URL>
+    cd StockApp
+
+---
+
+# 3️⃣ Start PostgreSQL (Docker)
+
+From the project root (where docker-compose.yml is located):
+
+    docker compose up -d
+    docker compose ps
+
+You should see something like:
+
+    trading_pg   postgres:16   Up   0.0.0.0:5433->5432/tcp
+
+We use port 5433 locally to avoid conflicts with Windows Postgres.
+
+---
+
+## Verify Database
+
+    docker exec -it trading_pg psql -U StockTrader -d TradingDB -c "SELECT current_user, current_database();"
+
+If that works, the database is running correctly.
+
+---
+
+## Reset Database (if authentication fails)
+
+    docker compose down
+    docker volume rm pgdata
+    docker compose up -d
+
+---
+
+# 4️⃣ Backend Setup (Django)
+
+## 4.1 Create Virtual Environment
+
+    cd Backend
+    py -m venv .venv
+    .\.venv\Scripts\activate
+    python -m pip install --upgrade pip
+
+## 4.2 Install Dependencies
+
+If requirements.txt exists:
+
+    pip install -r requirements.txt
+
+If not:
+
+    pip install django djangorestframework psycopg2-binary python-dotenv django-cors-headers
+    pip freeze > requirements.txt
+
+---
+
+## 4.3 Create Environment File (If it does not exist)
+
+Create:
+
+    StockApp/Backend/.env
+
+Add:
+
+    DEBUG=True
+    SECRET_KEY=dev-only-change-me
+    ALLOWED_HOSTS=127.0.0.1,localhost
+
+    DB_NAME=TradingDB
+    DB_USER=StockTrader
+    DB_PASSWORD=P@ssw0rd!
+    DB_HOST=127.0.0.1
+    DB_PORT=5433
+
+---
+
+## 4.4 Run Migrations
+
+    python manage.py migrate
+
+Optional (admin access):
+
+    python manage.py createsuperuser
+
+---
+
+## 4.5 Start Backend Server
+
+    python manage.py runserver
+
+Backend runs at:
+
+    http://127.0.0.1:8000
+
+---
+
+# 5️⃣ Important Django Settings
+
+CORS Configuration (/Backend/config/settings.py):
+
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
+CORS middleware should be first in MIDDLEWARE:
+
+    MIDDLEWARE = [
+        "corsheaders.middleware.CorsMiddleware",
+        ...
+    ]
+
+---
+
+# 6️⃣ Frontend Setup (React)
+
+## Run Front End Server
+
+    cd frontend
+    npm run dev
+
+Frontend runs at:
+
+    http://localhost:5173
+
+---
+
+# 7️⃣ Daily Development Workflow
+
+- This is for use when you have everything setup and want to run the app at a different time
+
+Start Database:
+
+    docker compose up -d
+
+Start Backend:
+
+    cd Backend
+    .\.venv\Scripts\activate
+    python manage.py runserver
+
+Start Frontend:
+
+    cd frontend
+    npm run dev
+
+---
+
+# Architecture Overview
+
+- React calls Django REST API
+- Django handles business logic and database interaction
+- PostgreSQL is the source of truth
+- Future trading engine will be a background worker writing to the database
+- Frontend reads latest state from the database via API
+
+
+# How to use
+
+The applications allows the creation of a user account or a signin if a account is already made. Once signed in the user can navigate using the task bar where they can view many different things like account holdings, account trades, account standing charts, a holdings diversity sectors chart, current balance, total gains and losses, and risk level. Trades are executed every morning because the algorithm needs to run overnight the trades then need to be manually uploaded for them to change the application(this is because we would have had to use paid services otherwise). This will change the users current holding alogn with any associated graphs and tables that may be affected. 
+
+# License
+[Open text file](lICENSE.txt)
